@@ -36,7 +36,7 @@
     main {
       position: absolute;
       left: 50%;
-      bottom: 40px;          /* distância da borda inferior */
+      bottom: 40px;
       transform: translateX(-50%);
       text-align: center;
       padding: 0 16px;
@@ -75,6 +75,7 @@
 
     a.link-github:hover {
       border-color: #38bdf8;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -84,6 +85,7 @@
       <h1>THEWEE</h1>
 
       <a
+        id="github-link"
         class="link-github"
         href="https://github.com/theweewee"
         target="_blank"
@@ -99,15 +101,24 @@
     <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- efeito sonoro no clique -->
+  <!-- efeito sonoro no clique geral -->
   <audio id="click-audio">
     <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- áudio especial no hover do GitHub -->
+  <audio id="hover-audio">
+    <source src="https://www.myinstants.com/media/sounds/foi-quando-gyro-finalmente-entendeu.mp3" type="audio/mpeg" />
   </audio>
 
   <script>
     const bg = document.getElementById("bg-audio");
     const clickSound = document.getElementById("click-audio");
+    const hoverSound = document.getElementById("hover-audio");
+    const githubLink = document.getElementById("github-link");
+
     let bgStarted = false;
+    let hoverPlaying = false;
 
     function startBgIfNeeded() {
       if (!bgStarted) {
@@ -116,11 +127,33 @@
       }
     }
 
-    // qualquer clique na página toca o efeito e garante o fundo tocando
+    // clique em qualquer lugar: garante fundo e toca efeito curto
     document.addEventListener("click", () => {
       startBgIfNeeded();
+      if (!hoverPlaying) {
+        clickSound.currentTime = 0;
+        clickSound.play().catch(() => {});
+      }
+    });
+
+    // quando o hover começa no link do GitHub
+    githubLink.addEventListener("mouseenter", () => {
+      startBgIfNeeded();
+      if (hoverPlaying) return;
+
+      hoverPlaying = true;
+      bg.pause();              // pausa fundo
+      clickSound.pause();
       clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
+
+      hoverSound.currentTime = 0;
+      hoverSound.play().catch(() => {});
+    });
+
+    // quando o áudio de hover termina, volta o fundo
+    hoverSound.addEventListener("ended", () => {
+      hoverPlaying = false;
+      bg.play().catch(() => {});
     });
   </script>
 </body>
