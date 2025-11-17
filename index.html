@@ -25,7 +25,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      /* cursor makita */
       cursor: url("./assets/makita.png"), auto;
     }
 
@@ -98,29 +97,36 @@
     </main>
   </div>
 
-  <!-- áudio de fundo em loop -->
+  <!-- fundo em loop -->
   <audio id="bg-audio" loop>
     <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- efeito sonoro no clique geral -->
+  <!-- clique geral -->
   <audio id="click-audio">
     <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- áudio especial no hover do GitHub -->
+  <!-- hover especial -->
   <audio id="hover-audio">
     <source src="https://www.myinstants.com/media/sounds/foi-quando-gyro-finalmente-entendeu.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- som da makita ao segurar o botão -->
+  <audio id="hold-audio" loop>
+    <source src="https://www.myinstants.com/media/sounds/makitaa.mp3" type="audio/mpeg" />
   </audio>
 
   <script>
     const bg = document.getElementById("bg-audio");
     const clickSound = document.getElementById("click-audio");
     const hoverSound = document.getElementById("hover-audio");
+    const holdSound = document.getElementById("hold-audio");
     const githubLink = document.getElementById("github-link");
 
     let bgStarted = false;
     let hoverPlaying = false;
+    let holding = false;
 
     function startBgIfNeeded() {
       if (!bgStarted) {
@@ -129,19 +135,19 @@
       }
     }
 
-    // clique em qualquer lugar: garante fundo e toca efeito curto
+    // clique em qualquer lugar: garante fundo e toca efeito curto (se não estiver em hover especial nem segurando)
     document.addEventListener("click", () => {
       startBgIfNeeded();
-      if (!hoverPlaying) {
+      if (!hoverPlaying && !holding) {
         clickSound.currentTime = 0;
         clickSound.play().catch(() => {});
       }
     });
 
-    // hover no link do GitHub: pausa fundo e toca o áudio especial
+    // hover no link do GitHub: pausa fundo e toca o áudio especial uma vez
     githubLink.addEventListener("mouseenter", () => {
       startBgIfNeeded();
-      if (hoverPlaying) return;
+      if (hoverPlaying || holding) return;
 
       hoverPlaying = true;
       bg.pause();
@@ -152,10 +158,41 @@
       hoverSound.play().catch(() => {});
     });
 
-    // quando o áudio de hover termina, volta o fundo
     hoverSound.addEventListener("ended", () => {
       hoverPlaying = false;
-      bg.play().catch(() => {});
+      if (!holding) {
+        bg.play().catch(() => {});
+      }
+    });
+
+    // segurar botão do mouse no link: som da makita loopando
+    githubLink.addEventListener("mousedown", (e) => {
+      startBgIfNeeded();
+      holding = true;
+
+      // pausa tudo e toca só a makita
+      bg.pause();
+      hoverSound.pause();
+      hoverSound.currentTime = 0;
+      clickSound.pause();
+      clickSound.currentTime = 0;
+
+      holdSound.currentTime = 0;
+      holdSound.play().catch(() => {});
+    });
+
+    // soltar botão (em qualquer lugar): para makita e volta fundo
+    document.addEventListener("mouseup", () => {
+      if (!holding) return;
+      holding = false;
+
+      holdSound.pause();
+      holdSound.currentTime = 0;
+
+      // se não estiver no meio do hover especial, retoma fundo
+      if (!hoverPlaying) {
+        bg.play().catch(() => {});
+      }
     });
   </script>
 </body>
