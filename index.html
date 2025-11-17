@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -12,32 +12,48 @@
       box-sizing: border-box;
     }
 
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* impede rolagem */
+    }
+
     body {
-      min-height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #f9fafb;
       background: #000 url("./assets/thewee-bg.gif") center center / cover no-repeat fixed;
       display: flex;
-      align-items: flex-end;      /* conteúdo na parte de baixo */
-      justify-content: center;    /* centralizado na horizontal */
-      padding: 32px 24px;         /* espaço do rodapé */
+      align-items: center;     /* centra verticalmente o container */
+      justify-content: center; /* centra horizontalmente o container */
+    }
+
+    .frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
     }
 
     main {
+      position: absolute;
+      left: 50%;
+      bottom: 40px;          /* distância da borda inferior */
+      transform: translateX(-50%);
       text-align: center;
+      padding: 0 16px;
     }
 
     h1 {
-      font-size: 32px;
-      letter-spacing: 0.2em;
+      font-size: 30px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     a.link-github {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: 10px;
       padding: 6px 18px;
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.7);
@@ -45,14 +61,14 @@
       text-decoration: none;
       font-size: 13px;
       gap: 8px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
     }
 
     a.link-github::before {
       content: "";
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       background: #38bdf8;
     }
@@ -63,17 +79,19 @@
   </style>
 </head>
 <body>
-  <main>
-    <h1>THEWEE</h1>
+  <div class="frame">
+    <main>
+      <h1>THEWEE</h1>
 
-    <a
-      class="link-github"
-      href="https://github.com/theweewee"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      github
-    </a>
-  </main>
+      <a
+        class="link-github"
+        href="https://github.com/theweewee"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        github
+      </a>
+    </main>
+  </div>
 </body>
 </html>
