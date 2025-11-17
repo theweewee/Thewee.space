@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden; /* impede rolagem */
+      overflow: hidden; /* sem rolagem */
     }
 
     body {
@@ -23,8 +23,8 @@
       color: #f9fafb;
       background: #000 url("./assets/thewee-bg.gif") center center / cover no-repeat fixed;
       display: flex;
-      align-items: center;     /* centra verticalmente o container */
-      justify-content: center; /* centra horizontalmente o container */
+      align-items: center;
+      justify-content: center;
     }
 
     .frame {
@@ -80,7 +80,7 @@
 </head>
 <body>
   <div class="frame">
-    <main>
+    <main id="click-area">
       <h1>THEWEE</h1>
 
       <a
@@ -93,5 +93,35 @@
       </a>
     </main>
   </div>
+
+  <!-- áudio de fundo em loop -->
+  <audio id="bg-audio" loop>
+    <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- efeito sonoro no clique -->
+  <audio id="click-audio">
+    <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    const bg = document.getElementById("bg-audio");
+    const clickSound = document.getElementById("click-audio");
+    let bgStarted = false;
+
+    function startBgIfNeeded() {
+      if (!bgStarted) {
+        bg.play().catch(() => {});
+        bgStarted = true;
+      }
+    }
+
+    // qualquer clique na página toca o efeito e garante o fundo tocando
+    document.addEventListener("click", () => {
+      startBgIfNeeded();
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    });
+  </script>
 </body>
 </html>
