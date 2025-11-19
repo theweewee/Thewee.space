@@ -2,198 +2,302 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>thewee.space</title>
+  <title>THEWEE.SPACE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Meta Tags para redes sociais -->
+  <meta property="og:title" content="THEWEE.SPACE" />
+  <meta property="og:description" content="Welcome to my space." />
+  <meta property="og:type" content="website" />
+  
+  <!-- Fonte Google (JetBrains Mono) para visual Tech -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary: #38bdf8;
+      --glass: rgba(0, 0, 0, 0.6);
+      --text: #f9fafb;
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden; /* sem rolagem */
+      overflow: hidden;
     }
 
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f9fafb;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+      /* DICA: Se possível, converta o GIF para MP4/WebM para carregar mais rápido */
       background: #000 url("./assets/Thiscloudfire.gif") center center / cover no-repeat fixed;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: url("./assets/makita.png"), auto;
+      cursor: url("./assets/makita.png"), auto; /* Fallback para auto se a imagem falhar */
+      transition: filter 0.2s;
     }
 
-    .frame {
-      position: relative;
-      width: 100%;
-      height: 100%;
+    /* Overlay para iniciar o áudio (Bypass Autoplay Policy) */
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+      transition: opacity 0.5s ease;
+    }
+    
+    #start-overlay p {
+      animation: pulse 1.5s infinite;
     }
 
+    /* Conteúdo Principal */
     main {
-      position: absolute;
-      left: 50%;
-      bottom: 40px;
-      transform: translateX(-50%);
+      position: relative;
+      z-index: 10;
       text-align: center;
-      padding: 0 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
     }
 
     h1 {
-      font-size: 30px;
-      letter-spacing: 0.18em;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      white-space: nowrap;
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+      mix-blend-mode: overlay;
     }
 
-    a.link-github {
+    /* Botão Github */
+    .link-github {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      margin-top: 10px;
-      padding: 6px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      color: #e5e7eb;
+      padding: 12px 24px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
       text-decoration: none;
-      font-size: 13px;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
+      font-size: 0.9rem;
+      gap: 10px;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
     }
 
-    a.link-github::before {
-      content: "";
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: #38bdf8;
+    /* Bolinha de status */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
     }
 
-    a.link-github:hover {
-      border-color: #38bdf8;
-      cursor: url("./assets/makita.png"), pointer;
+    .link-github:hover {
+      border-color: var(--primary);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+      /* cursor definido via JS ou mantido o global */
+    }
+
+    .link-github:active {
+      transform: scale(0.95);
+    }
+
+    /* Botão de Mute */
+    #mute-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ANIMAÇÕES */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      30% { transform: translate(3px, 2px) rotate(0deg); }
+      40% { transform: translate(1px, -1px) rotate(1deg); }
+      50% { transform: translate(-1px, 2px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      70% { transform: translate(3px, 1px) rotate(-1deg); }
+      80% { transform: translate(-1px, -1px) rotate(1deg); }
+      90% { transform: translate(1px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+
+    /* Classe ativada pelo JS para tremer a tela */
+    .shaking {
+      animation: shake 0.1s infinite;
+      filter: contrast(1.2) saturate(1.5);
+    }
+    
+    /* Responsividade */
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
-  <div class="frame">
-    <main id="click-area">
-      <h1>THEWEE</h1>
 
-      <a
-        id="github-link"
-        class="link-github"
-        href="https://github.com/theweewee"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        github
+  <!-- Overlay Inicial -->
+  <div id="start-overlay">
+    <p>[ CLICK TO ENTER ]</p>
+  </div>
+
+  <!-- Controle de Som -->
+  <button id="mute-btn">🔊 ON</button>
+
+  <div class="frame">
+    <main>
+      <h1>THEWEE</h1>
+      
+      <a id="github-link" class="link-github" href="https://github.com/theweewee" target="_blank" rel="noopener noreferrer">
+        <span class="status-dot"></span>
+        github.com/theweewee
       </a>
     </main>
   </div>
 
-  <!-- fundo em loop -->
+  <!-- ÁUDIOS -->
+  <!-- DICA: Baixe esses arquivos e coloque na pasta ./assets/ para o site não quebrar se o MyInstants cair -->
   <audio id="bg-audio" loop>
     <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- clique geral -->
   <audio id="click-audio">
     <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- hover especial -->
   <audio id="hover-audio">
     <source src="https://www.myinstants.com/media/sounds/foi-quando-gyro-finalmente-entendeu.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- som da makita ao segurar o botão -->
   <audio id="hold-audio" loop>
     <source src="https://www.myinstants.com/media/sounds/makitaa.mp3" type="audio/mpeg" />
   </audio>
 
   <script>
-    const bg = document.getElementById("bg-audio");
-    const clickSound = document.getElementById("click-audio");
-    const hoverSound = document.getElementById("hover-audio");
-    const holdSound = document.getElementById("hold-audio");
+    // Elementos
+    const body = document.body;
+    const startOverlay = document.getElementById('start-overlay');
+    const muteBtn = document.getElementById('mute-btn');
     const githubLink = document.getElementById("github-link");
+    
+    // Áudios
+    const audioElements = {
+      bg: document.getElementById("bg-audio"),
+      click: document.getElementById("click-audio"),
+      hover: document.getElementById("hover-audio"),
+      hold: document.getElementById("hold-audio")
+    };
 
-    let bgStarted = false;
-    let hoverPlaying = false;
-    let holding = false;
+    // Estados
+    let isMuted = false;
+    let isStarted = false;
+    let isHovering = false;
+    let isHolding = false;
 
-    function startBgIfNeeded() {
-      if (!bgStarted) {
-        bg.play().catch(() => {});
-        bgStarted = true;
+    // Configura volumes iniciais (opcional, para equilibrar)
+    audioElements.bg.volume = 0.4; 
+    audioElements.hold.volume = 1.0; // Makita no máximo
+
+    // --- 1. Inicialização (Click to Enter) ---
+    startOverlay.addEventListener('click', () => {
+      startOverlay.style.opacity = '0';
+      setTimeout(() => startOverlay.remove(), 500);
+      
+      isStarted = true;
+      playAudio(audioElements.bg);
+      playAudio(audioElements.click); // Feedback imediato
+    });
+
+    // --- 2. Controle de Mute ---
+    muteBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Não disparar o clique do body
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇 OFF' : '🔊 ON';
+      
+      Object.values(audioElements).forEach(audio => {
+        audio.muted = isMuted;
+      });
+    });
+
+    // --- 3. Lógica Geral de Áudio ---
+    function playAudio(audio) {
+      if (!isMuted && audio.paused) {
+        audio.play().catch(() => console.log("Interação necessária"));
       }
     }
 
-    // clique em qualquer lugar: garante fundo e toca efeito curto (se não estiver em hover especial nem segurando)
-    document.addEventListener("click", () => {
-      startBgIfNeeded();
-      if (!hoverPlaying && !holding) {
-        clickSound.currentTime = 0;
-        clickSound.play().catch(() => {});
-      }
+    function stopAudio(audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    // Clique Geral (apenas efeito sonoro curto)
+    document.addEventListener("click", (e) => {
+      if (!isStarted || isHolding || e.target === githubLink || githubLink.contains(e.target)) return;
+      
+      stopAudio(audioElements.click);
+      playAudio(audioElements.click);
     });
 
-    // hover no link do GitHub: pausa fundo e toca o áudio especial uma vez
+    // --- 4. Interações com o Botão (Hover & Hold) ---
+
+    // HOVER: Pausa música, toca Gyro
     githubLink.addEventListener("mouseenter", () => {
-      startBgIfNeeded();
-      if (hoverPlaying || holding) return;
+      if (isHolding || !isStarted) return;
+      isHovering = true;
 
-      hoverPlaying = true;
-      bg.pause();
-      clickSound.pause();
-      clickSound.currentTime = 0;
-
-      hoverSound.currentTime = 0;
-      hoverSound.play().catch(() => {});
+      audioElements.bg.pause();
+      stopAudio(audioElements.click);
+      stopAudio(audioElements.hover);
+      playAudio(audioElements.hover);
     });
 
-    hoverSound.addEventListener("ended", () => {
-      hoverPlaying = false;
-      if (!holding) {
-        bg.play().catch(() => {});
+    // Fim do Hover (quando mouse sai ou áudio acaba)
+    const endHover = () => {
+      if (!isHovering) return;
+      isHovering = false;
+      
+      // Só volta a música se não estiver segurando o botão
+      if (!isHolding && isStarted) {
+        playAudio(audioElements.bg);
       }
-    });
+    };
 
-    // segurar botão do mouse no link: som da makita loopando
-    githubLink.addEventListener("mousedown", (e) => {
-      startBgIfNeeded();
-      holding = true;
-
-      // pausa tudo e toca só a makita
-      bg.pause();
-      hoverSound.pause();
-      hoverSound.currentTime = 0;
-      clickSound.pause();
-      clickSound.currentTime = 0;
-
-      holdSound.currentTime = 0;
-      holdSound.play().catch(() => {});
-    });
-
-    // soltar botão (em qualquer lugar): para makita e volta fundo
-    document.addEventListener("mouseup", () => {
-      if (!holding) return;
-      holding = false;
-
-      holdSound.pause();
-      holdSound.currentTime = 0;
-
-      // se não estiver no meio do hover especial, retoma fundo
-      if (!hoverPlaying) {
-        bg.play().catch(() => {});
-      }
-    });
-  </script>
-</body>
-</html>
+    githubLink.addEventListener("mouseleave", () => {
+       // Se o áudio hover ainda estiver tocando, deixamos ele terminar? 
+       // Geralmente é melhor co
