@@ -5,7 +5,7 @@
   <title>THEWEE.SPACE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <!-- Fontes e Meta Tags -->
+  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
@@ -17,18 +17,13 @@
       --text: #f9fafb;
     }
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      cursor: none !important; /* ESCONDE O MOUSE PADRÃO PARA USAR A MAKITA */
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
 
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #000; /* Cor de fundo caso a imagem falhe */
+      background: #000;
     }
 
     body {
@@ -39,38 +34,27 @@
       justify-content: center;
     }
 
-    /* --- CURSOR PERSONALIZADO (MAKITA) --- */
+    /* CURSOR MAKITA */
     #custom-cursor {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 60px; /* Tamanho da makita */
-      height: 60px;
-      pointer-events: none; /* Permite clicar através da imagem */
+      width: 60px; height: 60px;
+      pointer-events: none;
       z-index: 99999;
       background-image: url("./assets/makita.png");
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      transform: translate(-50%, -50%); /* Centraliza no ponto do mouse */
-      transition: transform 0.1s linear; /* Suavidade leve */
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s linear;
     }
+    .spinning { animation: spin 0.1s linear infinite; }
+    @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* Animação de girar quando ativa */
-    .spinning {
-      animation: spin 0.1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    /* --- OVERLAY DE START --- */
+    /* START SCREEN */
     #start-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.95);
       z-index: 10000;
       display: flex;
       align-items: center;
@@ -78,12 +62,12 @@
       flex-direction: column;
       color: white;
     }
-    #start-overlay p { animation: pulse 1s infinite; }
+    #start-overlay h1 { animation: pulse 1s infinite; cursor: none; }
 
-    /* --- CONTEÚDO NO RODAPÉ --- */
+    /* MENU CONTAINER */
     main {
       position: absolute;
-      bottom: 50px; /* Fica embaixo */
+      bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -91,90 +75,128 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
+      gap: 20px;
+      width: 90%;
+      max-width: 400px;
     }
 
-    h1 {
+    h1.logo {
       font-size: 2.5rem;
       font-weight: 800;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       text-shadow: 0 0 15px var(--primary);
-      pointer-events: auto; /* Permite interação */
+      margin-bottom: 10px;
     }
 
-    .link-github {
-      display: inline-flex;
+    /* ESTILO DOS BOTÕES DO MENU */
+    .menu-list {
+      display: flex;
+      flex-direction: column; /* Um embaixo do outro */
+      gap: 10px;
+      width: 100%;
+    }
+
+    .link-btn {
+      position: relative;
+      display: flex;
+      justify-content: center;
       align-items: center;
-      padding: 10px 25px;
-      border-radius: 50px;
-      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 0;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
       color: var(--text);
       text-decoration: none;
       background: var(--glass);
-      backdrop-filter: blur(10px);
-      transition: 0.3s;
-      pointer-events: auto; /* Permite clique */
+      backdrop-filter: blur(8px);
+      transition: 0.2s;
+      font-size: 1rem;
+      text-transform: uppercase;
+      pointer-events: auto; 
+      overflow: hidden;
     }
 
-    .link-github:hover {
+    /* Efeito de hover nos botões */
+    .link-btn:hover {
       border-color: var(--primary);
-      background: rgba(56, 189, 248, 0.2);
-      transform: scale(1.05);
+      background: rgba(56, 189, 248, 0.15);
+      letter-spacing: 2px; /* Expande o texto */
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
     }
 
-    /* --- EFEITO DE TREMOR NA TELA --- */
+    /* Pequena barra lateral no hover */
+    .link-btn::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0%;
+      background: var(--primary);
+      transition: 0.2s;
+    }
+    .link-btn:hover::before { width: 5px; }
+
+    /* TREMOR (MAKITA) */
     @keyframes shake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      25% { transform: translate(-2px, -2px) rotate(-1deg); }
-      50% { transform: translate(2px, 1px) rotate(1deg); }
-      75% { transform: translate(-1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -1px) rotate(-1deg); }
+      0% { transform: translate(1px, 1px); }
+      25% { transform: translate(-2px, -2px); }
+      50% { transform: translate(2px, 1px); }
+      75% { transform: translate(-1px, 2px); }
+      100% { transform: translate(1px, -1px); }
     }
-    
-    .shaking {
-      animation: shake 0.05s infinite; /* Tremor muito rápido */
-    }
-    
-    /* Botão Mute */
+    .shaking { animation: shake 0.05s infinite; filter: contrast(1.2); }
+
+    /* MUTE BTN */
     #mute-btn {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: 1px solid white;
-      color: white;
-      padding: 5px 10px;
-      cursor: none; /* Esconde mouse também aqui */
-      z-index: 100;
-      pointer-events: auto;
+      top: 20px; right: 20px;
+      background: transparent; border: 1px solid white;
+      color: white; padding: 5px 10px;
+      z-index: 100; pointer-events: auto;
+      font-family: inherit;
     }
 
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes pulse { 50% { opacity: 0.5; } }
   </style>
 </head>
 <body>
 
-  <!-- Cursor Makita -->
   <div id="custom-cursor"></div>
 
-  <!-- Tela Inicial -->
   <div id="start-overlay">
-    <h1>[ CLIQUE PARA ENTRAR ]</h1>
+    <h1>[ CLIQUE PARA INICIAR ]</h1>
   </div>
 
   <button id="mute-btn">SOM: ON</button>
 
   <div class="frame">
     <main>
-      <h1>THEWEE</h1>
-      <a id="github-link" class="link-github" href="https://github.com/theweewee" target="_blank">
-        github.com/theweewee
-      </a>
+      <h1 class="logo">THEWEE</h1>
+      
+      <!-- MENU DE LINKS -->
+      <div class="menu-list">
+        <!-- Link 1: Subpasta de Projetos (exemplo) -->
+        <a class="link-btn" href="./projetos/index.html">
+          PROJETOS
+        </a>
+
+        <!-- Link 2: Subpasta Sobre (exemplo) -->
+        <a class="link-btn" href="./sobre.html">
+          SOBRE MIM
+        </a>
+
+        <!-- Link 3: GitHub Externo -->
+        <a class="link-btn" href="https://github.com/theweewee" target="_blank">
+          GITHUB
+        </a>
+      </div>
+
     </main>
   </div>
 
-  <!-- Áudios -->
+  <!-- ÁUDIOS -->
   <audio id="bg-audio" loop>
     <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
   </audio>
@@ -189,14 +211,14 @@
   </audio>
 
   <script>
-    // Elementos Principais
     const cursor = document.getElementById('custom-cursor');
     const body = document.body;
     const overlay = document.getElementById('start-overlay');
-    const githubLink = document.getElementById('github-link');
     const muteBtn = document.getElementById('mute-btn');
+    
+    // Seleciona TODOS os botões com a classe .link-btn
+    const allButtons = document.querySelectorAll('.link-btn');
 
-    // Áudios
     const audios = {
       bg: document.getElementById('bg-audio'),
       click: document.getElementById('click-audio'),
@@ -208,13 +230,13 @@
     let isMuted = false;
     let isHolding = false;
 
-    // 1. FAZER A MAKITA SEGUIR O MOUSE
-    document.addEventListener('mousemove', (e) => {
+    // Mouse Follow
+    document.addEventListener('mousemove', e => {
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
     });
 
-    // 2. INICIAR SITE
+    // Start
     overlay.addEventListener('click', () => {
       started = true;
       overlay.style.display = 'none';
@@ -223,83 +245,84 @@
       playSafe(audios.click);
     });
 
-    // 3. MUTE
+    // Mute
     muteBtn.addEventListener('click', () => {
       isMuted = !isMuted;
       muteBtn.innerText = isMuted ? "SOM: OFF" : "SOM: ON";
       Object.values(audios).forEach(a => a.muted = isMuted);
     });
 
-    // 4. LÓGICA DA MAKITA (O CAOS)
+    // --- LÓGICA MAKITA ---
     function startMakita() {
       if (!started) return;
       isHolding = true;
-      
-      // Para outros sons
       audios.bg.pause();
-      audios.hover.pause();
-      audios.hover.currentTime = 0;
-
-      // Toca makita e anima
+      audios.hover.pause(); audios.hover.currentTime = 0;
+      
       playSafe(audios.hold);
-      body.classList.add('shaking'); // Treme a tela
-      cursor.classList.add('spinning'); // Gira a makita
+      body.classList.add('shaking');
+      cursor.classList.add('spinning');
     }
 
     function stopMakita() {
       if (!isHolding) return;
       isHolding = false;
-
-      audios.hold.pause();
-      audios.hold.currentTime = 0;
-      
+      audios.hold.pause(); audios.hold.currentTime = 0;
       body.classList.remove('shaking');
       cursor.classList.remove('spinning');
-
-      if (started) playSafe(audios.bg);
+      if(started) playSafe(audios.bg);
     }
 
-    // EVENTOS DE CLIQUE (MOUSE DOWN)
-    window.addEventListener('mousedown', (e) => {
-      // Botão Esquerdo (0) APENAS no link OU Botão do Meio (1) em QUALQUER LUGAR
-      const isLeftClickOnLink = (e.button === 0 && (e.target === githubLink || githubLink.contains(e.target)));
-      const isMiddleClick = (e.button === 1); // Botão da rodinha
+    // --- APLICAR EVENTOS EM TODOS OS BOTÕES ---
+    allButtons.forEach(btn => {
+      
+      // Mouse Enter (Hover Sound)
+      btn.addEventListener('mouseenter', () => {
+        if (started && !isHolding) {
+          audios.bg.pause();
+          audios.hover.currentTime = 0;
+          playSafe(audios.hover);
+        }
+      });
 
-      if (isLeftClickOnLink || isMiddleClick) {
-        e.preventDefault(); // Evita scroll automático do botão do meio
-        startMakita();
-      }
-    });
+      // Mouse Leave (Retorna som de fundo)
+      btn.addEventListener('mouseleave', () => {
+        if (started && !isHolding) {
+           // Se quiser cortar o som do hover imediatamente, descomente:
+           // audios.hover.pause(); 
+           if(audios.hover.paused) playSafe(audios.bg);
+        }
+      });
 
-    // SOLTAR O CLIQUE (MOUSE UP)
-    window.addEventListener('mouseup', () => {
-      stopMakita();
-    });
+      // Mouse Down (Makita no botão esquerdo)
+      btn.addEventListener('mousedown', (e) => {
+        if(e.button === 0) { // Botão esquerdo
+          // e.preventDefault(); // Se quiser impedir o clique imediato para apreciar a makita, descomente.
+          startMakita();
+        }
+      });
 
-    // HOVER NO LINK (Somente se não estiver usando a makita)
-    githubLink.addEventListener('mouseenter', () => {
-      if (started && !isHolding) {
-        audios.bg.pause();
-        playSafe(audios.hover);
-      }
-    });
-
-    githubLink.addEventListener('mouseleave', () => {
-      if (started && !isHolding) {
-         // Opcional: parar o som do hover ou deixar terminar
-         if(audios.hover.paused) playSafe(audios.bg);
-      }
     });
     
+    // Som do hover acabou? Volta música.
     audios.hover.addEventListener('ended', () => {
        if(started && !isHolding) playSafe(audios.bg);
     });
 
-    // Função auxiliar para tocar sem erro
-    function playSafe(audio) {
-      if (!isMuted) audio.play().catch(e => console.log("Audio error:", e));
-    }
+    // Mouse Down Global (Botão do meio/scroll)
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 1) { // Botão do meio
+        e.preventDefault();
+        startMakita();
+      }
+    });
 
+    // Mouse Up Global (Para a Makita)
+    window.addEventListener('mouseup', stopMakita);
+
+    function playSafe(audio) {
+      if (!isMuted) audio.play().catch(() => {});
+    }
   </script>
 </body>
 </html>
