@@ -300,4 +300,47 @@
 
     githubLink.addEventListener("mouseleave", () => {
        // Se o áudio hover ainda estiver tocando, deixamos ele terminar? 
-       // Geralmente é melhor co
+       // Geralmente é melhor cortar se sair rápido, mas seu script original deixava.
+       // Vou fazer cortar para ficar mais ágil:
+       if(!isHolding) {
+         // stopAudio(audioElements.hover); // Descomente se quiser cortar o áudio ao sair
+         // endHover();
+       }
+    });
+
+    // Quando o áudio do hover acaba, volta a música
+    audioElements.hover.addEventListener("ended", endHover);
+
+
+    // HOLD (MAKITA TIME): Caos total
+    githubLink.addEventListener("mousedown", (e) => {
+      if (!isStarted || e.button !== 0) return; // Só botão esquerdo
+      isHolding = true;
+
+      // Pausa tudo
+      audioElements.bg.pause();
+      stopAudio(audioElements.hover);
+      stopAudio(audioElements.click);
+
+      // Toca Makita e Tremedeira
+      playAudio(audioElements.hold);
+      body.classList.add("shaking"); // EFEITO VISUAL
+    });
+
+    // Soltar (Mouseup global para garantir que pare mesmo se soltar fora do botão)
+    window.addEventListener("mouseup", () => {
+      if (!isHolding) return;
+      isHolding = false;
+
+      stopAudio(audioElements.hold);
+      body.classList.remove("shaking");
+
+      // Volta a música ambiente se não estiver no meio do hover (opcional)
+      if (isStarted) {
+        playAudio(audioElements.bg);
+      }
+    });
+
+  </script>
+</body>
+</html>
