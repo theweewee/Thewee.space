@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>SYSTEM_ROOT // TEHEW</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SYSTEM_ROOT // THEWEE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <!-- Fonte Hacker -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,39 +13,25 @@
     :root {
       --primary: #00ff41; /* Verde Matrix */
       --danger: #ff0000;
-      --glass: rgba(10, 20, 30, 0.8);
+      --glass: rgba(10, 20, 30, 0.90);
       --text: #e0e0e0;
     }
 
-    /* --- BLOQUEIO DE SELEÇÃO E CURSOR --- */
+    /* BLOQUEIOS GERAIS */
     * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      
-      /* Esconde o cursor padrão */
-      cursor: none !important; 
-      
-      /* IMPEDE SELEÇÃO DE TEXTO (O SEGREDO) */
-      -webkit-user-select: none; /* Safari/Chrome */
-      -moz-user-select: none;    /* Firefox */
-      -ms-user-select: none;     /* IE/Edge */
-      user-select: none;         /* Padrão */
-      
-      /* Impede arrastar imagens */
-      -webkit-user-drag: none;
+      margin: 0; padding: 0; box-sizing: border-box; 
+      -webkit-user-select: none; user-select: none;
+      -webkit-tap-highlight-color: transparent; /* Remove flash azul no android */
     }
 
     body {
       background: #000;
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
-      height: 100vh;
-      width: 100vw;
+      height: 100vh; width: 100vw;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
+      cursor: none; /* Esconde mouse no PC */
     }
 
     /* FUNDO */
@@ -62,29 +48,31 @@
       pointer-events: none; z-index: 9000;
     }
 
-    /* CURSOR */
+    /* CURSOR MAKITA */
     #custom-cursor {
-      position: fixed; width: 50px; height: 50px;
+      position: fixed; width: 60px; height: 60px;
       background: url("https://raw.githubusercontent.com/theweewee/Thewee.space/main/assets/makita.png") no-repeat center/contain;
       pointer-events: none; z-index: 10000;
-      transition: transform 0.05s;
-      display: none; /* Só aparece se mover o mouse */
+      transform: translate(-50%, -50%);
+      display: none;
       filter: drop-shadow(0 0 5px var(--primary));
     }
     .cursor-spin { animation: spin 0.1s linear infinite; }
     @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* SISTEMA (JANELA) */
+    /* JANELA DO SISTEMA */
     #system-container {
       width: 90%; max-width: 500px;
       border: 1px solid var(--primary);
       background: var(--glass);
       backdrop-filter: blur(10px);
-      padding: 25px;
+      padding: 20px;
       box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
-      display: none; /* Hidden until start */
-      flex-direction: column; gap: 20px;
+      display: none;
+      flex-direction: column; gap: 15px;
       position: relative;
+      z-index: 50;
+      max-height: 80vh;
     }
 
     .sys-header {
@@ -92,15 +80,21 @@
       padding-bottom: 10px;
       display: flex; justify-content: space-between;
       font-size: 0.8rem; color: var(--primary);
+      flex-shrink: 0;
     }
 
-    /* BOTÕES (SISTEMA DE ARQUIVOS) */
-    .file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      width: 100%;
+    /* BOTÕES E SCROLL */
+    .file-list-wrapper {
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-right: 5px;
     }
+    /* Scrollbar estilo hacker */
+    .file-list-wrapper::-webkit-scrollbar { width: 5px; }
+    .file-list-wrapper::-webkit-scrollbar-track { background: #000; }
+    .file-list-wrapper::-webkit-scrollbar-thumb { background: var(--primary); }
+
+    .file-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
     .file-btn {
       background: rgba(0,0,0,0.6);
@@ -109,16 +103,14 @@
       padding: 15px;
       text-decoration: none;
       display: flex; align-items: center; gap: 15px;
+      font-size: 0.9rem; text-transform: uppercase;
+      pointer-events: auto; cursor: pointer;
       transition: 0.2s;
-      font-size: 1rem; text-transform: uppercase;
-      /* IMPORTANTE: Permite clique, mas herda o bloqueio de seleção do * */
-      pointer-events: auto; 
     }
 
-    .file-btn:hover {
+    .file-btn:active, .file-btn:hover {
       border-color: var(--primary);
-      background: rgba(0, 255, 65, 0.1);
-      padding-left: 25px; /* Efeito de movimento */
+      background: rgba(0, 255, 65, 0.2);
       text-shadow: 0 0 8px var(--primary);
     }
 
@@ -127,33 +119,28 @@
       position: fixed; inset: 0;
       background: #000; z-index: 9999;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      color: var(--primary);
+      color: var(--primary); padding: 20px; text-align: center;
     }
     .click-prompt { 
-      margin-top: 20px; border: 1px solid var(--primary); 
-      padding: 10px 20px; animation: blink 1s infinite; 
-      /* Permite clicar mas não selecionar */
-      pointer-events: auto; 
-      display: none; 
+      margin-top: 30px; border: 1px solid var(--primary); 
+      padding: 15px 30px; animation: blink 1s infinite; 
+      font-size: 1.2rem; cursor: pointer; pointer-events: auto;
+      display: none; background: rgba(0, 255, 65, 0.1);
     }
 
     /* BARRA DE AQUECIMENTO */
-    #heat-wrapper { width: 100%; height: 4px; background: #333; margin-top: 10px; }
+    #heat-wrapper { width: 100%; height: 6px; background: #333; margin-top: 10px; border-radius: 3px; flex-shrink: 0; }
     #heat-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s; }
 
-    /* Animações de Erro */
+    /* EFEITOS VISUAIS */
     @keyframes glitch { 
-      0% { transform: translate(0); } 
-      20% { transform: translate(-3px, 3px); } 
-      40% { transform: translate(-3px, -3px); } 
-      60% { transform: translate(3px, 3px); } 
-      80% { transform: translate(3px, -3px); } 
-      100% { transform: translate(0); } 
+      0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 
+      40% { transform: translate(-3px, -3px); } 60% { transform: translate(3px, 3px); } 
+      80% { transform: translate(3px, -3px); } 100% { transform: translate(0); } 
     }
     .chaos-mode { animation: glitch 0.1s infinite; filter: contrast(1.5) hue-rotate(90deg); }
     @keyframes blink { 50% { opacity: 0; } }
     
-    /* Overlay Vermelho */
     #danger-overlay { position: fixed; inset: 0; background: red; opacity: 0; pointer-events: none; z-index: 8000; transition: opacity 0.1s; }
 
   </style>
@@ -168,26 +155,26 @@
 
   <!-- TELA INICIAL -->
   <div id="boot-screen">
-    <div id="boot-text" style="white-space: pre-wrap; text-align: left;"></div>
-    <div class="click-prompt" id="start-btn">[ INICIAR SISTEMA ]</div>
+    <div id="boot-text" style="white-space: pre-wrap; text-align: left; font-size: 0.9rem;"></div>
+    <div class="click-prompt" id="start-btn">INICIAR SISTEMA</div>
   </div>
 
   <!-- PAINEL PRINCIPAL -->
   <div id="system-container">
     <div class="sys-header">
-      <span>USER: TEHEW</span>
+      <span>USER: THEWEE</span>
       <span id="sys-status">ONLINE</span>
     </div>
 
-    <!-- AQUI FICAM OS BOTÕES -->
-    <div class="file-list" id="file-list"></div>
+    <div class="file-list-wrapper">
+      <div class="file-list" id="file-list"></div>
+    </div>
 
-    <!-- BARRA DE AQUECIMENTO -->
     <div style="margin-top: 10px; font-size: 0.7rem; opacity: 0.7;">MAKITA_RPM:</div>
     <div id="heat-wrapper"><div id="heat-bar"></div></div>
   </div>
 
-  <!-- ÁUDIOS GERAIS -->
+  <!-- ÁUDIOS -->
   <audio id="audio-bg" loop>
     <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
   </audio>
@@ -197,43 +184,30 @@
   <audio id="audio-crash">
      <source src="https://www.myinstants.com/media/sounds/windows-xp-error.mp3" type="audio/mpeg" />
   </audio>
-
-  <!-- ÁUDIOS ESPECÍFICOS PARA BOTÕES -->
   <audio id="sound-gyro">
     <source src="https://www.myinstants.com/media/sounds/foi-quando-gyro-finalmente-entendeu.mp3" type="audio/mpeg" />
   </audio>
-  
   <audio id="sound-click">
     <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
   </audio>
 
   <script>
     /* =================================================
-       1. CONFIGURAÇÃO DOS BOTÕES (Nome, Link, ID do Som)
+       1. CONFIGURAÇÃO DE PASTAS
        ================================================= */
-    const BUTTONS = [
-      {
-        name: "GITHUB",
-        url: "https://github.com/tehewdev", 
-        soundId: "sound-gyro", 
-        icon: "💻"
-      },
-      {
-        name: "HOME PAGE (ANTIGA)",
-        url: "https://github.com/theweewee/Thewee.space/blob/main/index.html", 
-        soundId: "sound-click", 
-        icon: "🏠"
-      },
-      {
-        name: "OUTRO LINK",
-        url: "#", 
-        soundId: "sound-click", 
-        icon: "⚙️"
-      }
+    const REPO_OWNER = "theweewee";
+    const REPO_NAME = "Thewee.space";
+    const TARGET_FOLDER = "pasta-liquida"; // A pasta onde seus HTMLs estão
+
+    // Botões Fixos (Sempre aparecem)
+    const FIXED_BUTTONS = [
+      { name: "💻 GITHUB ROOT", url: `https://github.com/${REPO_OWNER}`, soundId: "sound-gyro" }
     ];
 
+    const IGNORE_LIST = ["index.html", "_notes"]; // Arquivos para ignorar dentro da pasta liquida
+
     /* =================================================
-       2. SISTEMA E VARIÁVEIS
+       2. VARIÁVEIS DO SISTEMA
        ================================================= */
     const els = {
       cursor: document.getElementById('custom-cursor'),
@@ -258,164 +232,196 @@
       holding: false,
       heat: 0,
       crashed: false,
-      currentHoverSound: null
+      fetchedButtons: []
     };
 
     /* =================================================
-       3. MATRIX RAIN (Fundo)
+       3. MATRIX RAIN (OTIMIZADO)
        ================================================= */
     const canvas = document.getElementById('matrix-canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const letters = "01 TEHEW SYS";
-    const drops = Array(Math.floor(canvas.width / 14)).fill(1);
-
+    let width, height;
+    function resizeMatrix() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeMatrix); resizeMatrix();
+    const letters = "01 THEWEE LIQUID";
+    const drops = Array(Math.floor(width / 14)).fill(1);
     function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#00ff41";
-      ctx.font = "14px monospace";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#00ff41"; ctx.font = "14px monospace";
       drops.forEach((y, i) => {
         ctx.fillText(letters[Math.floor(Math.random()*letters.length)], i*14, y*14);
-        if(y*14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
+        if(y*14 > height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
       });
       requestAnimationFrame(drawMatrix);
     }
     drawMatrix();
 
     /* =================================================
-       4. BOOT SEQUENCE
+       4. SCANNER DO GITHUB (DETECTA PASTA-LIQUIDA)
        ================================================= */
-    const bootLines = [
-      "Booting Kernel...",
-      "Loading User Data...",
-      "Verifying Makita RPM... [READY]",
-      "System Loaded."
-    ];
+    async function scanRepository() {
+      try {
+        els.bootText.innerHTML += `Scanning /${TARGET_FOLDER}...<br>`;
+        
+        // Chama API do GitHub para ler a pasta específica
+        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TARGET_FOLDER}`);
+        
+        if (!response.ok) {
+           // Se der 404 (pasta não existe ainda), não quebra o site, só avisa
+           if(response.status === 404) throw new Error("Folder not found");
+           throw new Error("Network Error");
+        }
+
+        const files = await response.json();
+
+        files.forEach(file => {
+          if (IGNORE_LIST.includes(file.name)) return;
+
+          let displayName = file.name.replace(".html", "").replace(/-/g, " ").toUpperCase();
+          
+          // Se for pasta, assume que tem um index.html dentro
+          // Caminho: pasta-liquida/NOME/index.html
+          let linkUrl = file.type === "dir" 
+            ? `./${TARGET_FOLDER}/${file.name}/index.html`
+            : `./${TARGET_FOLDER}/${file.name}`;
+
+          state.fetchedButtons.push({
+            name: "📂 " + displayName,
+            url: linkUrl,
+            soundId: "sound-click"
+          });
+        });
+
+        els.bootText.innerHTML += `Objects Detected: ${state.fetchedButtons.length} [OK]<br>`;
+
+      } catch (error) {
+        els.bootText.innerHTML += `Scan Alert: ${error.message} (Using fixed links only)<br>`;
+        console.log("Github API Info:", error);
+      }
+    }
+
+    /* =================================================
+       5. BOOT
+       ================================================= */
+    const bootLines = ["Initializing Kernel...", "Mounting Liquid Folder...", "Verifying Makita RPM..."];
     let line = 0;
-    function runBoot() {
-      if(line < bootLines.length) {
+
+    async function runBoot() {
+      if (line < bootLines.length) {
         els.bootText.innerHTML += bootLines[line] + "<br>";
         line++;
-        setTimeout(runBoot, 400);
+        setTimeout(runBoot, 300);
       } else {
+        await scanRepository();
         els.startBtn.style.display = "block";
       }
     }
     window.onload = runBoot;
 
-    // Ao clicar em INICIAR
-    els.startBtn.addEventListener('click', () => {
+    function startSystem() {
+      if(state.booted) return;
       state.booted = true;
       els.bootScreen.style.display = 'none';
       els.sysContainer.style.display = 'flex';
-      
       audio.bg.volume = 0.3;
       audio.bg.play().catch(()=>{});
-
       renderButtons();
-    });
+    }
+    els.startBtn.addEventListener('click', startSystem);
+    els.startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startSystem(); });
 
     /* =================================================
-       5. RENDERIZAR BOTÕES
+       6. RENDERIZAR BOTÕES
        ================================================= */
     function renderButtons() {
       els.fileList.innerHTML = ""; 
+      const allButtons = [...FIXED_BUTTONS, ...state.fetchedButtons];
 
-      BUTTONS.forEach(btnData => {
+      allButtons.forEach(btnData => {
         const a = document.createElement('a');
         a.href = btnData.url;
         a.className = 'file-btn';
-        a.target = btnData.url.startsWith('http') ? '_blank' : '_self';
-        a.innerHTML = `<span>${btnData.icon}</span> <span>${btnData.name}</span>`;
+        if(btnData.url.startsWith('http')) a.target = "_blank";
+        
+        a.innerHTML = `<span>${btnData.name}</span>`;
 
         const btnSound = document.getElementById(btnData.soundId);
-
-        // Hover
-        a.addEventListener('mouseenter', () => {
-          if(!state.holding && !state.crashed) {
-            if(state.currentHoverSound) {
-              state.currentHoverSound.pause();
-              state.currentHoverSound.currentTime = 0;
-            }
-            state.currentHoverSound = btnSound;
-            audio.bg.pause();
-            btnSound.currentTime = 0;
-            btnSound.play().catch(()=>{});
-          }
-        });
-
-        // Leave
-        a.addEventListener('mouseleave', () => {
-          if(!state.holding && !state.crashed) {
-             if(audio.bg.paused) audio.bg.play().catch(()=>{});
-          }
-        });
         
-        if(btnSound) {
-          btnSound.addEventListener('ended', () => {
-             if(state.booted && !state.holding) audio.bg.play().catch(()=>{});
-          });
-        }
+        // Evento de Click (PC + Mobile seguro)
+        const handleClick = (e) => {
+           // Toca som
+           if(btnSound) { btnSound.currentTime = 0; btnSound.play().catch(()=>{}); }
+           // Navegador segue o link naturalmente
+        };
 
-        // Mousedown
-        a.addEventListener('mousedown', (e) => {
-           if(e.button === 0) startMakita();
-        });
+        a.addEventListener('click', handleClick);
+
+        // Previne que a makita ative em cima do botão no touch
+        a.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
+        a.addEventListener('mousedown', (e) => e.stopPropagation());
 
         els.fileList.appendChild(a);
       });
     }
 
     /* =================================================
-       6. MAKITA (HOLD & CRASH)
+       7. CURSOR E MAKITA (CAOS)
        ================================================= */
-    
-    document.addEventListener('mousemove', (e) => {
+    function updateCursor(x, y) {
       els.cursor.style.display = 'block';
-      els.cursor.style.left = e.clientX + 'px';
-      els.cursor.style.top = e.clientY + 'px';
-    });
+      els.cursor.style.left = x + 'px'; els.cursor.style.top = y + 'px';
+    }
 
-    function startMakita() {
+    function triggerChaos(x, y) {
       if(!state.booted || state.crashed) return;
       state.holding = true;
-
-      audio.bg.pause();
-      if(state.currentHoverSound) state.currentHoverSound.pause();
-
-      audio.makita.currentTime = 0;
-      audio.makita.play().catch(()=>{});
-
+      updateCursor(x, y);
+      audio.bg.pause(); audio.makita.currentTime = 0; audio.makita.play().catch(()=>{});
       els.cursor.classList.add('cursor-spin');
       document.body.classList.add('chaos-mode');
     }
 
-    function stopMakita() {
+    function stopChaos() {
       if(!state.holding) return;
       state.holding = false;
-
       audio.makita.pause();
       els.cursor.classList.remove('cursor-spin');
       document.body.classList.remove('chaos-mode');
       els.danger.style.opacity = 0;
-
-      if(!state.crashed) {
-        state.heat = 0;
-        updateHeat();
-        audio.bg.play().catch(()=>{});
-      }
+      if(!state.crashed) { state.heat = 0; updateHeat(); audio.bg.play().catch(()=>{}); els.cursor.style.display = 'none'; }
     }
 
+    // PC INPUTS
+    document.addEventListener('mousemove', e => { if(state.booted && !state.crashed) updateCursor(e.clientX, e.clientY); });
+    window.addEventListener('mousedown', e => {
+      if(state.booted && (e.button === 0 || e.button === 1)) triggerChaos(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', stopChaos);
+
+    // MOBILE INPUTS (TOUCH)
+    window.addEventListener('touchstart', e => {
+      // Se o alvo não for um botão, liga a makita
+      if(!e.target.closest('.file-btn') && !e.target.closest('.click-prompt') && state.booted) {
+         triggerChaos(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, {passive: false});
+
+    window.addEventListener('touchmove', e => { 
+      if(state.holding) updateCursor(e.touches[0].clientX, e.touches[0].clientY); 
+    }, {passive: false});
+    
+    window.addEventListener('touchend', stopChaos);
+
+    /* =================================================
+       8. AQUECIMENTO
+       ================================================= */
     setInterval(() => {
       if(state.crashed) return;
-
       if(state.holding) {
-        state.heat += 2; 
-        els.sysContainer.style.transform = `translate(${Math.random()*4 - 2}px, ${Math.random()*4 - 2}px)`; 
+        state.heat += 2;
+        const s = 5;
+        els.sysContainer.style.transform = `translate(${Math.random()*s-s/2}px, ${Math.random()*s-s/2}px)`;
         els.danger.style.opacity = state.heat / 100;
-
         if(state.heat > 70) els.status.innerText = "WARNING: OVERHEAT";
         if(state.heat >= 100) crashSystem();
       } else {
@@ -428,42 +434,21 @@
     function updateHeat() {
       if(state.heat < 0) state.heat = 0;
       els.heatBar.style.width = state.heat + "%";
-      if(state.heat < 50) {
-        els.heatBar.style.background = "var(--primary)";
-        els.status.innerText = "ONLINE";
-        els.status.style.color = "var(--primary)";
-      } else {
-        els.heatBar.style.background = "red";
-        els.status.style.color = "red";
-      }
+      els.heatBar.style.background = state.heat < 50 ? "var(--primary)" : "red";
+      if(state.heat < 50) { els.status.innerText = "ONLINE"; els.status.style.color = "var(--primary)"; }
+      else { els.status.style.color = "red"; }
     }
 
     function crashSystem() {
-      state.crashed = true;
-      state.holding = false;
-      audio.makita.pause();
-      audio.crash.play().catch(()=>{});
-
-      document.body.style.background = "#0000aa"; 
-      els.sysContainer.style.display = 'none';
-      els.cursor.style.display = 'none';
+      state.crashed = true; state.holding = false;
+      audio.makita.pause(); audio.crash.play().catch(()=>{});
+      document.body.style.background = "#0000aa";
+      els.sysContainer.style.display = 'none'; els.cursor.style.display = 'none';
       document.body.classList.remove('chaos-mode');
-      
-      els.bootScreen.style.display = 'flex';
-      els.startBtn.style.display = 'none';
-      els.bootText.innerHTML = "FATAL ERROR 0xC0000221<br>MAKITA RPM OVERLOAD.<br><br>Rebooting System...";
-
+      els.bootScreen.style.display = 'flex'; els.startBtn.style.display = 'none';
+      els.bootText.innerHTML = "FATAL ERROR 0xC0000221<br>SYSTEM OVERLOAD.<br><br>Rebooting...";
       setTimeout(() => location.reload(), 4000);
     }
-
-    window.addEventListener('mousedown', (e) => {
-      if(state.booted && (e.button === 1 || e.button === 0)) {
-        if(e.button === 1) e.preventDefault(); 
-        startMakita();
-      }
-    });
-    window.addEventListener('mouseup', stopMakita);
-
   </script>
 </body>
 </html>
