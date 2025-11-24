@@ -52,10 +52,6 @@
             animation: glitch-anim 0.1s infinite;
         }
 
-        .shake-element {
-            display: inline-block;
-        }
-
         /* --- BARRA DE INSTABILIDADE (HEAT) --- */
         #instability-container {
             position: fixed;
@@ -77,14 +73,29 @@
         /* --- CURSOR --- */
         #custom-cursor {
             position: fixed;
+            width: 80px;
+            height: 80px;
+            /* Ícone da Makita para o cursor - AGORA O OFICIAL */
+            background: url('https://raw.githubusercontent.com/theweewee/Thewee.space/main/assets/makita.png') no-repeat center center;
+            background-size: contain;
             pointer-events: none;
             z-index: 10000;
             transform: translate(-50%, -50%);
             display: none;
-            mix-blend-mode: difference;
+            /* Removi o invert para mostrar as cores reais da makita, mantive o brilho vermelho de perigo */
+            filter: drop-shadow(0 0 10px red);
         }
-        .cursor-spin { animation: spin 0.2s linear infinite; }
-        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        
+        /* AGORA GIRA DE VERDADE */
+        .cursor-spin { animation: spin 0.1s linear infinite; }
+        
+        @keyframes spin { 
+            0% { transform: translate(-50%, -50%) rotate(0deg); } 
+            100% { transform: translate(-50%, -50%) rotate(360deg); } 
+        }
+        
+        /* Antiga animação de vibrar (removida em favor do GIRO REAL) */
+        /* @keyframes vibrate { ... } */
 
         /* --- TELA DE BOOT --- */
         #boot-layer {
@@ -106,6 +117,14 @@
         .hacker-scroll::-webkit-scrollbar-track { background: #000; }
         .hacker-scroll::-webkit-scrollbar-thumb { background: #3B82F6; }
 
+        .glitch-text {
+            position: relative;
+        }
+        
+        .safe-hover:hover {
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body class="h-screen w-full relative text-white">
@@ -114,10 +133,13 @@
     <audio id="audio-bg" loop>
         <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
     </audio>
-    <!-- Usando um som de energia elétrica/noise em vez da makita literal para combinar com o mago, mas mantendo o caos -->
+    
+    <!-- A VERDADEIRA LENDA: SOM DA MAKITA -->
     <audio id="audio-chaos" loop>
-        <source src="https://www.myinstants.com/media/sounds/electric-hum.mp3" type="audio/mpeg" />
+        <!-- Som de serra elétrica / ferramenta a trabalhar -->
+        <source src="https://www.myinstants.com/media/sounds/makitaa.mp3" type="audio/mpeg" />
     </audio>
+    
     <audio id="audio-crash">
         <source src="https://www.myinstants.com/media/sounds/windows-xp-error.mp3" type="audio/mpeg" />
     </audio>
@@ -125,29 +147,25 @@
          <source src="https://www.myinstants.com/media/sounds/button-click.mp3" type="audio/mpeg" />
     </audio>
 
-    <!-- CURSOR -->
-    <div id="custom-cursor">
-        <div class="w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
-            <div class="w-1 h-1 bg-white rounded-full"></div>
-        </div>
-    </div>
+    <!-- CURSOR (AGORA É UMA SERRA) -->
+    <div id="custom-cursor"></div>
 
     <!-- TELA DE BOOT -->
     <div id="boot-layer" class="terminal-font text-green-500 text-xs md:text-sm p-4">
-        <div id="boot-log" class="mb-4 text-left w-full max-w-lg h-64 overflow-hidden border border-green-900 p-2 bg-black/50"></div>
-        <button id="start-sys-btn" class="hidden border border-green-500 px-6 py-2 hover:bg-green-500 hover:text-black transition-colors uppercase tracking-widest animate-pulse">
+        <div id="boot-log" class="mb-4 text-left w-full max-w-lg h-64 overflow-hidden border border-green-900 p-2 bg-black/50 font-mono"></div>
+        <button id="start-sys-btn" class="hidden border border-green-500 px-6 py-2 hover:bg-green-500 hover:text-black transition-colors uppercase tracking-widest animate-pulse font-bold">
             Inicializar Sistema
         </button>
     </div>
 
     <!-- TELA AZUL (CRASH) -->
-    <div id="bsod-screen" class="hidden fixed inset-0 z-[10002] bg-blue-800 text-white flex-col items-start justify-center p-10 terminal-font cursor-auto">
+    <div id="bsod-screen" class="hidden fixed inset-0 z-[10002] bg-blue-800 text-white flex flex-col items-start justify-center p-10 terminal-font cursor-auto select-none">
         <h1 class="text-4xl md:text-6xl mb-6">:(</h1>
         <p class="text-xl mb-4">Your wizard ran into a problem and needs to restart.</p>
-        <p class="text-sm opacity-80 mb-8">Stop overclocking the mana spell. We're just collecting some error info.</p>
+        <p class="text-sm opacity-80 mb-8">System Overload: RPM limits exceeded by user.</p>
         <div class="text-xs opacity-70">
-            STOP CODE: MANA_OVERFLOW_EXCEPTION<br>
-            FILE: GRIMOIRE_SYS_32.DLL
+            STOP CODE: MAKITA_OVERLOAD_EXCEPTION<br>
+            FILE: WIZARD_OS.SYS
         </div>
         <div class="mt-8 text-center w-full">
             <span class="animate-pulse">Rebooting automatically...</span>
@@ -161,7 +179,7 @@
         <canvas id="magic-canvas" class="absolute inset-0 z-0"></canvas>
         
         <!-- Imagem Hero (Fundo) -->
-        <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 z-0 pointer-events-none">
              <img 
                 src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop" 
                 alt="Wizard" 
@@ -181,13 +199,11 @@
 
             <nav class="hidden md:flex space-x-8 text-xs font-bold tracking-widest uppercase">
                 <a href="#" class="hover:text-blue-400 transition-colors safe-hover">Home</a>
-                <!-- O botão Recursos ativa o Scanner do GitHub -->
                 <button onclick="toggleResources()" class="hover:text-blue-400 transition-colors text-xs font-bold tracking-widest uppercase safe-hover flex items-center gap-2">
                     <i class="fas fa-terminal"></i> Recursos
                 </button>
             </nav>
             
-            <!-- Mobile Menu Btn -->
             <button class="md:hidden text-white safe-hover text-xl" onclick="toggleResources()">
                 <i class="fas fa-terminal"></i>
             </button>
@@ -206,7 +222,7 @@
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white glitch-text">THEWEE.SPACE</span>
                 </h2>
                 
-                <p class="text-lg md:text-2xl font-light text-gray-300 max-w-lg border-l-4 border-blue-500 pl-4">
+                <p class="text-lg md:text-2xl font-light text-gray-300 max-w-lg border-l-4 border-blue-500 pl-4 bg-black/30 backdrop-blur-sm py-2">
                     Onde a magia encontra o código fonte.
                     <br><span class="text-xs terminal-font text-gray-500 mt-2 block">> Cuidado: Não segure o clique...</span>
                 </p>
@@ -224,10 +240,14 @@
 
         <!-- Footer -->
         <footer class="relative z-20 w-full py-4 px-6 flex justify-between items-center text-xs text-gray-400 glass-panel border-b-0 border-l-0 border-r-0">
-            <div class="terminal-font">ID: USER_<?php echo rand(1000,9999); ?></div>
+            <!-- PHP substituído por ID gerado via JS -->
+            <div class="terminal-font" id="user-id-display">ID: USER_INITIALIZING...</div>
             <div class="flex gap-4 text-lg">
-                <i class="fab fa-github hover:text-white transition-colors safe-hover"></i>
-                <i class="fab fa-discord hover:text-white transition-colors safe-hover"></i>
+                <!-- Link atualizado para o perfil do GitHub -->
+                <a href="https://github.com/theweewee" target="_blank" class="hover:text-white transition-colors safe-hover cursor-pointer">
+                    <i class="fab fa-github"></i>
+                </a>
+                <i class="fab fa-discord hover:text-white transition-colors safe-hover cursor-pointer"></i>
             </div>
         </footer>
 
@@ -237,21 +257,16 @@
         </div>
     </div>
 
-    <!-- MODAL DE RECURSOS (GITHUB SCANNER INTEGRADO) -->
+    <!-- MODAL DE RECURSOS -->
     <div id="resources-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
         <div class="bg-gray-900 border border-blue-500 w-full max-w-2xl h-[80vh] flex flex-col shadow-[0_0_50px_rgba(59,130,246,0.2)]">
-            <!-- Header do Modal -->
             <div class="bg-blue-900/30 p-3 border-b border-blue-500 flex justify-between items-center">
                 <span class="terminal-font text-blue-300 text-sm"><i class="fas fa-folder-open mr-2"></i> root/pasta-liquida/</span>
                 <button onclick="toggleResources()" class="text-red-400 hover:text-white safe-hover"><i class="fas fa-times"></i></button>
             </div>
-            
-            <!-- Lista de Arquivos (Conteúdo Dinâmico) -->
             <div class="flex-grow p-4 overflow-y-auto hacker-scroll bg-black/90 terminal-font" id="file-list-container">
                 <div class="text-gray-500 animate-pulse">> Scanning repository...</div>
             </div>
-            
-            <!-- Footer do Modal -->
             <div class="p-2 bg-gray-900 border-t border-blue-500/30 text-[10px] text-gray-500 text-right terminal-font">
                 GITHUB_API_V3 // CONNECTED
             </div>
@@ -284,6 +299,20 @@
             click: document.getElementById('audio-click')
         };
 
+        // --- POOL DE ÁUDIO PARA DIGITAÇÃO RÁPIDA ---
+        // Cria várias cópias do som para permitir sobreposição sem lag
+        const clickPool = [];
+        const POOL_SIZE = 10;
+        let poolIndex = 0;
+
+        // Inicializa o pool assim que possível
+        const clickSrc = audio.click.querySelector('source').src;
+        for(let i = 0; i < POOL_SIZE; i++) {
+            const a = new Audio(clickSrc);
+            a.volume = 0.4; // Volume agradável
+            clickPool.push(a);
+        }
+
         let state = {
             booted: false,
             holding: false,
@@ -292,13 +321,15 @@
             filesLoaded: false
         };
 
+        // --- 0. JS FIX FOR PHP ---
+        document.getElementById('user-id-display').innerText = 'ID: USER_' + Math.floor(Math.random() * 9000 + 1000);
+
         // --- 1. BOOT SEQUENCE ---
         const bootLines = [
             "> Initializing WizardOS Kernel v4.2...",
             "> Loading graphic drivers... [OK]",
             "> Connecting to Neural Network...",
-            "> Verifying Magic Mana Levels...",
-            "> WARNING: Unstable Energy Detected.",
+            "> Verifying Makita RPM Levels... [DANGER]",
             "> System Ready."
         ];
 
@@ -310,7 +341,7 @@
                 ui.bootLog.appendChild(p);
                 ui.bootLog.scrollTop = ui.bootLog.scrollHeight;
                 lineIdx++;
-                setTimeout(runBoot, Math.random() * 500 + 100);
+                setTimeout(runBoot, Math.random() * 400 + 100);
             } else {
                 ui.startBtn.classList.remove('hidden');
             }
@@ -322,14 +353,12 @@
             ui.bootLayer.style.opacity = '0';
             setTimeout(() => { 
                 ui.bootLayer.style.display = 'none'; 
-                // Inicia áudio BG (volume baixo)
                 audio.bg.volume = 0.2;
-                audio.bg.play().catch(e => console.log("Audio autoplay block"));
+                audio.bg.play().catch(e => console.log("Audio autoplay block - user needs to interact first"));
             }, 500);
         });
 
-        // --- 2. CHAOS MECHANIC (A "MAKITA" MÁGICA) ---
-        // Se clicar em coisas seguras (botões, links), não ativa o caos
+        // --- 2. CHAOS MECHANIC (A MAKITA MÁGICA) ---
         function isSafeTarget(target) {
             return target.closest('.safe-hover') || target.closest('#resources-modal');
         }
@@ -341,13 +370,16 @@
             ui.cursor.style.display = 'block';
             updateCursor(e);
             
-            // Audio switch
             audio.bg.pause();
-            audio.chaos.currentTime = 0;
-            audio.chaos.volume = 0.5; // Começa médio
-            audio.chaos.play();
+            
+            // RESETAR SOM DA MAKITA PARA O COMEÇO PARA TER O EFEITO DE ARRANQUE
+            if(audio.chaos.paused) {
+                audio.chaos.currentTime = 0;
+                audio.chaos.volume = 0.4;
+                audio.chaos.playbackRate = 0.8; // Começa mais grave (motor lento)
+                audio.chaos.play().catch(e => console.error(e));
+            }
 
-            // Visual effects
             document.body.classList.add('chaos-mode');
             ui.cursor.classList.add('cursor-spin');
         }
@@ -357,8 +389,11 @@
             state.holding = false;
             
             audio.chaos.pause();
+            // Reseta a velocidade para a próxima vez
+            audio.chaos.playbackRate = 1.0; 
+
             if (!state.crashed) {
-                audio.bg.play();
+                audio.bg.play().catch(e => {});
                 ui.cursor.style.display = 'none';
                 document.body.classList.remove('chaos-mode');
                 ui.main.style.transform = `translate(0px, 0px)`;
@@ -372,55 +407,92 @@
             ui.cursor.style.top = y + 'px';
         }
 
-        // Event Listeners para Mouse/Touch
         window.addEventListener('mousedown', startChaos);
-        window.addEventListener('mousemove', (e) => {
-            if(state.holding) updateCursor(e);
-        });
+        window.addEventListener('mousemove', (e) => { if(state.holding) updateCursor(e); });
         window.addEventListener('mouseup', stopChaos);
         
         window.addEventListener('touchstart', (e) => startChaos(e), {passive: false});
         window.addEventListener('touchmove', (e) => {
             if(state.holding) {
-                e.preventDefault(); // Previne scroll enquanto destrói o sistema
+                e.preventDefault(); 
                 updateCursor(e);
             }
         }, {passive: false});
         window.addEventListener('touchend', stopChaos);
 
-        // --- 3. GAME LOOP (AQUECIMENTO) ---
+        // --- NOVO: RECONHECIMENTO DE TECLADO (POOL MODE) ---
+        window.addEventListener('keydown', (e) => {
+            // Só funciona se o sistema iniciou
+            if (!state.booted || state.crashed) return;
+
+            // 1. Efeito Sonoro (Usando Pool)
+            const sound = clickPool[poolIndex];
+            
+            // Pequena variação de velocidade para mudar o tom (pitch) de cada tecla
+            // Isso faz parecer um teclado mecânico real onde nem todas as teclas soam iguais
+            sound.playbackRate = 0.9 + Math.random() * 0.4; 
+            sound.currentTime = 0; // Reinicia o som se ele ainda estiver tocando
+            
+            sound.play().catch(err => {
+                // Navegadores bloqueiam áudio se não houver interação prévia
+                console.log("Audio block:", err);
+            });
+
+            // Avança para o próximo som do pool (ciclo)
+            poolIndex = (poolIndex + 1) % POOL_SIZE;
+
+            // 2. Efeito Visual (Feedback)
+            // Um leve flash na borda da tela para sentir o impacto
+            const intensity = Math.random() * 0.5;
+            ui.main.style.textShadow = `${Math.random() * 4 - 2}px ${Math.random() * 4 - 2}px 0px rgba(0, 255, 0, ${intensity})`;
+            
+            // Glitch aleatório na posição (só as vezes)
+            if(Math.random() > 0.8) {
+                 ui.main.style.transform = `translate(${Math.random() * 2 - 1}px, ${Math.random() * 2 - 1}px)`;
+                 setTimeout(() => ui.main.style.transform = 'translate(0,0)', 50);
+            }
+            
+            // Limpa o text-shadow rápido
+            setTimeout(() => {
+                ui.main.style.textShadow = 'none';
+            }, 100);
+        });
+
+        // --- 3. GAME LOOP ---
         function gameLoop() {
             if (state.crashed) return;
 
             if (state.holding) {
-                // Aumenta instabilidade
                 state.heat += 0.8;
                 
-                // Shake effect (CSS Transform)
+                // Shake effect intensity based on heat
                 const intensity = Math.min(state.heat / 5, 20);
                 const x = (Math.random() - 0.5) * intensity;
                 const y = (Math.random() - 0.5) * intensity;
                 ui.main.style.transform = `translate(${x}px, ${y}px)`;
 
-                // Aumenta pitch/volume do audio de caos
-                audio.chaos.volume = Math.min(state.heat / 100, 1);
+                // --- LÓGICA DE SOM DE RPM ---
+                // Volume sobe com o heat
+                audio.chaos.volume = Math.min(0.4 + (state.heat / 200), 1);
+                
+                // PlaybackRate sobe com o heat (simula motor acelerando)
+                // Começa em 0.8 e vai até 1.5 (muito agudo e rápido)
+                let newRate = 0.8 + (state.heat / 150);
+                if (newRate > 1.8) newRate = 1.8;
+                audio.chaos.playbackRate = newRate;
 
                 if (state.heat >= 100) {
                     crashSystem();
                 }
             } else {
-                // Esfria sistema
                 if (state.heat > 0) state.heat -= 2;
                 if (state.heat < 0) state.heat = 0;
             }
 
-            // Atualiza barra
             ui.bar.style.width = state.heat + '%';
-            
-            // Muda cor da barra baseado no perigo
-            if(state.heat > 80) ui.bar.style.background = '#EF4444'; // Red
-            else if(state.heat > 50) ui.bar.style.background = '#A855F7'; // Purple
-            else ui.bar.style.background = '#3B82F6'; // Blue
+            if(state.heat > 80) ui.bar.style.background = '#EF4444';
+            else if(state.heat > 50) ui.bar.style.background = '#A855F7';
+            else ui.bar.style.background = '#3B82F6';
 
             requestAnimationFrame(gameLoop);
         }
@@ -431,60 +503,46 @@
             stopChaos();
             audio.chaos.pause();
             audio.bg.pause();
-            audio.crash.play();
+            audio.crash.play().catch(e => {});
             
             ui.main.style.display = 'none';
             ui.bsod.style.display = 'flex';
-            
-            setTimeout(() => {
-                location.reload();
-            }, 5000);
+            setTimeout(() => { location.reload(); }, 5000);
         }
 
-        // --- 4. GITHUB SCANNER (Recursos) ---
+        // --- 4. GITHUB SCANNER ---
         window.toggleResources = () => {
             audio.click.currentTime = 0;
-            audio.click.play();
+            audio.click.play().catch(e => {});
             ui.modal.classList.toggle('active');
-            
-            if (ui.modal.classList.contains('active') && !state.filesLoaded) {
-                fetchRepo();
-            }
+            if (ui.modal.classList.contains('active') && !state.filesLoaded) fetchRepo();
         };
 
         async function fetchRepo() {
             ui.fileList.innerHTML = '<div class="text-blue-400 animate-pulse">> Connecting to Neural Uplink...</div>';
-            
             try {
                 const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TARGET_FOLDER}`;
                 const response = await fetch(url);
-                
-                if (!response.ok) throw new Error("Connection Refused (404/403)");
-                
+                if (!response.ok) throw new Error("Connection Refused");
                 const data = await response.json();
-                ui.fileList.innerHTML = ''; // Limpa loading
-
-                // Adiciona botão Home/Root
+                ui.fileList.innerHTML = ''; 
                 addFileLink(".. ROOT / HOME", "https://github.com/theweewee/Thewee.space", true);
-
                 data.forEach(item => {
                     if(item.name.includes('.html')) {
                         addFileLink(item.name.replace('.html', '').toUpperCase(), `/${TARGET_FOLDER}/${item.name}`, false);
                     }
                 });
                 state.filesLoaded = true;
-
             } catch (err) {
-                // Fallback (Mock Data) se a API falhar para demo
+                // FALLBACK MOCK DATA IF REPO IS PRIVATE OR DOESN'T EXIST
                 ui.fileList.innerHTML = `
-                    <div class="text-red-400 mb-2">> ERROR: ${err.message}</div>
-                    <div class="text-gray-500 mb-4">> Loading cached hologram data...</div>
+                    <div class="text-red-400 mb-2">> WARN: ${err.message} (Using cached holograms)</div>
                 `;
-                // Dados falsos para demo
                 addFileLink(".. ROOT", "#", true);
                 addFileLink("PROJECT_ALPHA", "#", false);
-                addFileLink("CHAOS_ENGINE", "#", false);
-                addFileLink("WIZARD_NOTES", "#", false);
+                addFileLink("MAKITA_SPECS_V2", "#", false);
+                addFileLink("WIZARD_NOTES_ENCRYPTED", "#", false);
+                addFileLink("CHAOS_THEORY_101", "#", false);
             }
         }
 
@@ -497,17 +555,14 @@
                 </span>
                 <span class="text-gray-600 text-xs group-hover:text-blue-400">ACCESS >></span>
             `;
-            div.onclick = () => {
-                window.open(url, '_blank');
-            };
+            div.onclick = () => window.open(url, '_blank');
             ui.fileList.appendChild(div);
         }
 
-        // --- 5. PARTICLE SYSTEM (VISUAL APENAS) ---
+        // --- 5. VISUALS ---
         const canvas = document.getElementById('magic-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
 
@@ -536,19 +591,14 @@
                 ctx.fill();
             }
         }
-
-        function initParticles() {
-            for(let i=0; i<50; i++) particles.push(new Particle());
-        }
+        function initParticles() { for(let i=0; i<50; i++) particles.push(new Particle()); }
         initParticles();
-
         function animateParticles() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animateParticles);
         }
         animateParticles();
-
     </script>
 </body>
 </html>
