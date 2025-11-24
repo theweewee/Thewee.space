@@ -1,483 +1,554 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>SYSTEM_ROOT // THEWEE</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  
-  <!-- Fonte Hacker -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;800&display=swap" rel="stylesheet">
-
-  <style>
-    /* ================= ESTILOS (VISUAL HACKER) ================= */
-    :root {
-      --primary: #00ff41; /* Verde Matrix */
-      --danger: #ff0000;
-      --glass: rgba(5, 10, 15, 0.92);
-      --text: #e0e0e0;
-    }
-
-    * { 
-      margin: 0; padding: 0; box-sizing: border-box; 
-      -webkit-user-select: none; user-select: none; /* Sem seleção de texto */
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: #000;
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      height: 100vh; width: 100vw;
-      overflow: hidden;
-      display: flex; justify-content: center; align-items: center;
-      cursor: none; /* Cursor escondido (substituído pela Makita) */
-    }
-
-    /* --- FUNDOS E EFEITOS --- */
-    #bg-gif {
-      position: fixed; inset: 0;
-      background: url("https://media.tenor.com/J_7_S-32W44AAAAC/cloud-fire.gif") center center / cover no-repeat;
-      opacity: 0.25; z-index: -2;
-    }
-    #matrix-canvas { position: fixed; inset: 0; z-index: -1; }
-    .scanlines {
-      position: fixed; inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      background-size: 100% 2px, 3px 100%;
-      pointer-events: none; z-index: 9000;
-    }
-
-    /* --- CURSOR MAKITA --- */
-    #custom-cursor {
-      position: fixed; width: 60px; height: 60px;
-      background: url("https://raw.githubusercontent.com/theweewee/Thewee.space/main/assets/makita.png") no-repeat center/contain;
-      pointer-events: none; z-index: 10000;
-      transform: translate(-50%, -50%);
-      display: none;
-      filter: drop-shadow(0 0 8px var(--primary));
-    }
-    .cursor-spin { animation: spin 0.1s linear infinite; }
-    @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-
-    /* --- JANELA DO SISTEMA --- */
-    #system-container {
-      width: 90%; max-width: 450px;
-      border: 1px solid var(--primary);
-      background: var(--glass);
-      backdrop-filter: blur(12px);
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
-      display: none; /* Escondido até iniciar */
-      flex-direction: column; gap: 15px;
-      position: relative;
-      z-index: 50;
-      max-height: 80vh;
-    }
-
-    .sys-header {
-      border-bottom: 1px solid var(--primary);
-      padding-bottom: 10px;
-      display: flex; justify-content: space-between;
-      font-size: 0.8rem; color: var(--primary);
-      flex-shrink: 0;
-    }
-
-    /* LISTA DE ARQUIVOS (BOTÕES) */
-    .file-list-wrapper {
-      overflow-y: auto;
-      flex-grow: 1;
-      padding-right: 5px;
-    }
-    /* Scrollbar personalizada */
-    .file-list-wrapper::-webkit-scrollbar { width: 4px; }
-    .file-list-wrapper::-webkit-scrollbar-track { background: #000; }
-    .file-list-wrapper::-webkit-scrollbar-thumb { background: var(--primary); }
-
-    .file-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-
-    .file-btn {
-      background: rgba(0,0,0,0.6);
-      border: 1px solid #333;
-      color: var(--text);
-      padding: 12px 15px;
-      text-decoration: none;
-      display: flex; align-items: center; gap: 15px;
-      font-size: 0.85rem; text-transform: uppercase;
-      pointer-events: auto; cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .file-btn:hover, .file-btn:active {
-      border-color: var(--primary);
-      background: rgba(0, 255, 65, 0.15);
-      padding-left: 20px; /* Animação de deslize */
-      text-shadow: 0 0 5px var(--primary);
-    }
-
-    /* --- TELA DE BOOT --- */
-    #boot-screen {
-      position: fixed; inset: 0;
-      background: #000; z-index: 9999;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      color: var(--primary); padding: 20px; text-align: center;
-    }
-    .click-prompt { 
-      margin-top: 25px; border: 1px solid var(--primary); 
-      padding: 15px 30px; animation: blink 1s infinite; 
-      font-size: 1rem; cursor: pointer; pointer-events: auto;
-      display: none; background: rgba(0, 255, 65, 0.1);
-    }
-    .boot-log { font-size: 0.8rem; color: #0f0; text-align: left; white-space: pre-wrap; }
-
-    /* --- BARRA DE AQUECIMENTO (OVERHEAT) --- */
-    #heat-wrapper { width: 100%; height: 4px; background: #333; margin-top: 10px; border-radius: 2px; flex-shrink: 0; }
-    #heat-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s; }
-
-    /* EFEITOS DE CAOS */
-    @keyframes glitch { 
-      0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 
-      40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 
-      80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } 
-    }
-    .chaos-mode { animation: glitch 0.08s infinite; filter: contrast(1.3) hue-rotate(90deg); }
-    @keyframes blink { 50% { opacity: 0.3; } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THEWEE.SPACE // SYSTEM_ROOT</title>
     
-    #danger-overlay { position: fixed; inset: 0; background: #f00; opacity: 0; pointer-events: none; z-index: 8000; transition: opacity 0.1s; }
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Montserrat (Design) + Fira Code (Hacker) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  </style>
+    <style>
+        :root {
+            --neon-blue: #3B82F6;
+            --danger-red: #EF4444;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #050505;
+            overflow: hidden; /* Importante para o efeito de shake não criar scrollbars */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- UI ELEMENTS --- */
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-font { font-family: 'Fira Code', monospace; }
+
+        /* --- EFEITOS DE CAOS (MAKITA MODE) --- */
+        @keyframes glitch-anim {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); filter: hue-rotate(90deg); }
+            40% { transform: translate(-3px, -3px); filter: invert(0.2); }
+            60% { transform: translate(3px, 3px); }
+            80% { transform: translate(3px, -3px); filter: hue-rotate(-90deg); }
+            100% { transform: translate(0); }
+        }
+
+        .chaos-mode {
+            animation: glitch-anim 0.1s infinite;
+        }
+
+        .shake-element {
+            display: inline-block;
+        }
+
+        /* --- BARRA DE INSTABILIDADE (HEAT) --- */
+        #instability-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: #111;
+            z-index: 9999;
+        }
+        #instability-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EF4444);
+            transition: width 0.05s linear;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* --- CURSOR --- */
+        #custom-cursor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            display: none;
+            mix-blend-mode: difference;
+        }
+        .cursor-spin { animation: spin 0.2s linear infinite; }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* --- TELA DE BOOT --- */
+        #boot-layer {
+            position: fixed; inset: 0; background: #000; z-index: 10001;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        /* --- MODAL DE RECURSOS (GitHub Scanner) --- */
+        #resources-modal {
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0; pointer-events: none; transform: scale(0.95);
+        }
+        #resources-modal.active {
+            opacity: 1; pointer-events: auto; transform: scale(1);
+        }
+        
+        /* Scrollbar hacker */
+        .hacker-scroll::-webkit-scrollbar { width: 4px; }
+        .hacker-scroll::-webkit-scrollbar-track { background: #000; }
+        .hacker-scroll::-webkit-scrollbar-thumb { background: #3B82F6; }
+
+    </style>
 </head>
-<body>
+<body class="h-screen w-full relative text-white">
 
-  <!-- ELEMENTOS DE FUNDO -->
-  <div id="bg-gif"></div>
-  <canvas id="matrix-canvas"></canvas>
-  <div class="scanlines"></div>
-  <div id="danger-overlay"></div>
-  <div id="custom-cursor"></div>
+    <!-- SONS -->
+    <audio id="audio-bg" loop>
+        <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
+    </audio>
+    <!-- Usando um som de energia elétrica/noise em vez da makita literal para combinar com o mago, mas mantendo o caos -->
+    <audio id="audio-chaos" loop>
+        <source src="https://www.myinstants.com/media/sounds/electric-hum.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="audio-crash">
+        <source src="https://www.myinstants.com/media/sounds/windows-xp-error.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="audio-click">
+         <source src="https://www.myinstants.com/media/sounds/button-click.mp3" type="audio/mpeg" />
+    </audio>
 
-  <!-- TELA DE BOOT (INICIALIZAÇÃO) -->
-  <div id="boot-screen">
-    <div id="boot-text" class="boot-log"></div>
-    <div class="click-prompt" id="start-btn">CONNECT SYSTEM</div>
-  </div>
-
-  <!-- JANELA PRINCIPAL -->
-  <div id="system-container">
-    <div class="sys-header">
-      <span>LOC: PASTA-LIQUIDA</span>
-      <span id="sys-status">ONLINE</span>
+    <!-- CURSOR -->
+    <div id="custom-cursor">
+        <div class="w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
+            <div class="w-1 h-1 bg-white rounded-full"></div>
+        </div>
     </div>
 
-    <div class="file-list-wrapper">
-      <!-- AQUI O JAVASCRIPT VAI INJETAR OS BOTÕES -->
-      <div class="file-list" id="file-list"></div>
+    <!-- TELA DE BOOT -->
+    <div id="boot-layer" class="terminal-font text-green-500 text-xs md:text-sm p-4">
+        <div id="boot-log" class="mb-4 text-left w-full max-w-lg h-64 overflow-hidden border border-green-900 p-2 bg-black/50"></div>
+        <button id="start-sys-btn" class="hidden border border-green-500 px-6 py-2 hover:bg-green-500 hover:text-black transition-colors uppercase tracking-widest animate-pulse">
+            Inicializar Sistema
+        </button>
     </div>
 
-    <div style="margin-top: 10px; font-size: 0.7rem; opacity: 0.6;">MAKITA_RPM_LOAD:</div>
-    <div id="heat-wrapper"><div id="heat-bar"></div></div>
-  </div>
+    <!-- TELA AZUL (CRASH) -->
+    <div id="bsod-screen" class="hidden fixed inset-0 z-[10002] bg-blue-800 text-white flex-col items-start justify-center p-10 terminal-font cursor-auto">
+        <h1 class="text-4xl md:text-6xl mb-6">:(</h1>
+        <p class="text-xl mb-4">Your wizard ran into a problem and needs to restart.</p>
+        <p class="text-sm opacity-80 mb-8">Stop overclocking the mana spell. We're just collecting some error info.</p>
+        <div class="text-xs opacity-70">
+            STOP CODE: MANA_OVERFLOW_EXCEPTION<br>
+            FILE: GRIMOIRE_SYS_32.DLL
+        </div>
+        <div class="mt-8 text-center w-full">
+            <span class="animate-pulse">Rebooting automatically...</span>
+        </div>
+    </div>
 
-  <!-- SONS (LINKS EXTERNOS PARA SEGURANÇA) -->
-  <audio id="audio-bg" loop>
-    <source src="https://www.myinstants.com/media/sounds/dexter-song-2.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="audio-makita" loop>
-    <source src="https://www.myinstants.com/media/sounds/makitaa.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="audio-crash">
-     <source src="https://www.myinstants.com/media/sounds/windows-xp-error.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="sound-click">
-    <source src="https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3" type="audio/mpeg" />
-  </audio>
-
-  <script>
-    /* =================================================
-       1. CONFIGURAÇÃO DO SCANNER (IMPORTANTE)
-       ================================================= */
-    const REPO_OWNER = "theweewee";   // Seu usuário
-    const REPO_NAME = "Thewee.space"; // Seu repositório
-    const TARGET_FOLDER = "pasta-liquida"; // A pasta que o script vai ler
-
-    // Arquivos que devem ser ignorados pelo scanner
-    const IGNORE_LIST = ["index.html", "404.html", "_redirects"];
-
-    // Botões que SEMPRE aparecem (fixos)
-    const FIXED_BUTTONS = [
-      { name: "💾 ROOT (HOME)", url: "https://github.com/theweewee/Thewee.space", soundId: "sound-click" }
-    ];
-
-    /* =================================================
-       2. VARIÁVEIS DE CONTROLE
-       ================================================= */
-    const els = {
-      cursor: document.getElementById('custom-cursor'),
-      bootScreen: document.getElementById('boot-screen'),
-      bootText: document.getElementById('boot-text'),
-      startBtn: document.getElementById('start-btn'),
-      sysContainer: document.getElementById('system-container'),
-      fileList: document.getElementById('file-list'),
-      heatBar: document.getElementById('heat-bar'),
-      danger: document.getElementById('danger-overlay'),
-      status: document.getElementById('sys-status')
-    };
-
-    const audio = {
-      bg: document.getElementById('audio-bg'),
-      makita: document.getElementById('audio-makita'),
-      crash: document.getElementById('audio-crash')
-    };
-
-    let state = {
-      booted: false,
-      holding: false,
-      heat: 0,
-      crashed: false,
-      fetchedButtons: []
-    };
-
-    /* =================================================
-       3. SCANNER DA API DO GITHUB (O CÉREBRO)
-       ================================================= */
-    async function scanRepository() {
-      try {
-        els.bootText.innerHTML += `> Connecting to ${TARGET_FOLDER}...\n`;
+    <!-- CONTEÚDO PRINCIPAL (MISTURA DO VISUAL MÁGICO COM A ESTRUTURA) -->
+    <div id="main-interface" class="relative h-full w-full flex flex-col justify-between transition-transform duration-100">
         
-        // URL da API para ler a pasta específica
-        const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TARGET_FOLDER}`;
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        <!-- Canvas de Partículas (Fundo) -->
+        <canvas id="magic-canvas" class="absolute inset-0 z-0"></canvas>
         
-        const data = await response.json();
+        <!-- Imagem Hero (Fundo) -->
+        <div class="absolute inset-0 z-0">
+             <img 
+                src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2568&auto=format&fit=crop" 
+                alt="Wizard" 
+                class="w-full h-full object-cover object-[75%_center] opacity-60"
+            >
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80"></div>
+            <div class="absolute inset-0 bg-blue-900/20 mix-blend-overlay"></div>
+        </div>
 
-        // Processa cada item encontrado na pasta
-        data.forEach(item => {
-          if (IGNORE_LIST.includes(item.name)) return;
+        <!-- Navbar -->
+        <header class="relative z-20 w-full px-6 py-5 flex justify-between items-center glass-panel border-b-0 border-t-0 border-l-0 border-r-0">
+            <div class="flex flex-col group safe-hover">
+                <h1 class="text-2xl font-bold tracking-wider">
+                    THE<span class="font-light text-blue-400">WEE</span><span class="text-xs align-top opacity-50 ml-1 terminal-font">//ROOT</span>
+                </h1>
+            </div>
 
-          let displayName = item.name.replace(".html", "").replace(/-/g, " ").toUpperCase();
-          let finalUrl = "";
+            <nav class="hidden md:flex space-x-8 text-xs font-bold tracking-widest uppercase">
+                <a href="#" class="hover:text-blue-400 transition-colors safe-hover">Home</a>
+                <!-- O botão Recursos ativa o Scanner do GitHub -->
+                <button onclick="toggleResources()" class="hover:text-blue-400 transition-colors text-xs font-bold tracking-widest uppercase safe-hover flex items-center gap-2">
+                    <i class="fas fa-terminal"></i> Recursos
+                </button>
+            </nav>
+            
+            <!-- Mobile Menu Btn -->
+            <button class="md:hidden text-white safe-hover text-xl" onclick="toggleResources()">
+                <i class="fas fa-terminal"></i>
+            </button>
+        </header>
 
-          if (item.type === "dir") {
-            // Se for pasta, o link aponta para pasta-liquida/nome/
-            finalUrl = `./${TARGET_FOLDER}/${item.name}/`;
-            displayName = "📁 " + displayName;
-          } else if (item.type === "file" && item.name.endsWith(".html")) {
-            // Se for arquivo HTML, aponta para pasta-liquida/nome.html
-            finalUrl = `./${TARGET_FOLDER}/${item.name}`;
-            displayName = "📄 " + displayName;
-          }
+        <!-- Hero Content -->
+        <main class="relative z-10 flex-grow flex items-center px-6 md:px-12 pointer-events-none">
+            <div class="max-w-4xl space-y-6 pointer-events-auto">
+                <div class="terminal-font text-blue-400 text-xs flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    SYSTEM ONLINE
+                </div>
+                
+                <h2 class="text-5xl md:text-8xl font-black leading-none uppercase drop-shadow-lg mix-blend-overlay opacity-90">
+                    BEM-VINDO AO<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white glitch-text">THEWEE.SPACE</span>
+                </h2>
+                
+                <p class="text-lg md:text-2xl font-light text-gray-300 max-w-lg border-l-4 border-blue-500 pl-4">
+                    Onde a magia encontra o código fonte.
+                    <br><span class="text-xs terminal-font text-gray-500 mt-2 block">> Cuidado: Não segure o clique...</span>
+                </p>
 
-          if (finalUrl) {
-            state.fetchedButtons.push({
-              name: displayName,
-              url: finalUrl,
-              soundId: "sound-click"
-            });
-          }
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <button class="safe-hover bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-sm uppercase tracking-wide shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all transform hover:-translate-y-1">
+                        Junte-se Agora
+                    </button>
+                    <button onclick="toggleResources()" class="safe-hover border border-white/30 hover:bg-white/10 backdrop-blur-md text-white font-bold py-3 px-8 rounded-sm uppercase tracking-wide transition-all">
+                        Acessar Grimório (Repos)
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="relative z-20 w-full py-4 px-6 flex justify-between items-center text-xs text-gray-400 glass-panel border-b-0 border-l-0 border-r-0">
+            <div class="terminal-font">ID: USER_<?php echo rand(1000,9999); ?></div>
+            <div class="flex gap-4 text-lg">
+                <i class="fab fa-github hover:text-white transition-colors safe-hover"></i>
+                <i class="fab fa-discord hover:text-white transition-colors safe-hover"></i>
+            </div>
+        </footer>
+
+        <!-- Barra de Instabilidade -->
+        <div id="instability-container">
+            <div id="instability-bar"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE RECURSOS (GITHUB SCANNER INTEGRADO) -->
+    <div id="resources-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-gray-900 border border-blue-500 w-full max-w-2xl h-[80vh] flex flex-col shadow-[0_0_50px_rgba(59,130,246,0.2)]">
+            <!-- Header do Modal -->
+            <div class="bg-blue-900/30 p-3 border-b border-blue-500 flex justify-between items-center">
+                <span class="terminal-font text-blue-300 text-sm"><i class="fas fa-folder-open mr-2"></i> root/pasta-liquida/</span>
+                <button onclick="toggleResources()" class="text-red-400 hover:text-white safe-hover"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <!-- Lista de Arquivos (Conteúdo Dinâmico) -->
+            <div class="flex-grow p-4 overflow-y-auto hacker-scroll bg-black/90 terminal-font" id="file-list-container">
+                <div class="text-gray-500 animate-pulse">> Scanning repository...</div>
+            </div>
+            
+            <!-- Footer do Modal -->
+            <div class="p-2 bg-gray-900 border-t border-blue-500/30 text-[10px] text-gray-500 text-right terminal-font">
+                GITHUB_API_V3 // CONNECTED
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA DO SISTEMA -->
+    <script>
+        // --- CONFIGURAÇÃO ---
+        const REPO_OWNER = "theweewee";
+        const REPO_NAME = "Thewee.space";
+        const TARGET_FOLDER = "pasta-liquida";
+        
+        const ui = {
+            bootLayer: document.getElementById('boot-layer'),
+            bootLog: document.getElementById('boot-log'),
+            startBtn: document.getElementById('start-sys-btn'),
+            main: document.getElementById('main-interface'),
+            cursor: document.getElementById('custom-cursor'),
+            bar: document.getElementById('instability-bar'),
+            modal: document.getElementById('resources-modal'),
+            fileList: document.getElementById('file-list-container'),
+            bsod: document.getElementById('bsod-screen')
+        };
+
+        const audio = {
+            bg: document.getElementById('audio-bg'),
+            chaos: document.getElementById('audio-chaos'),
+            crash: document.getElementById('audio-crash'),
+            click: document.getElementById('audio-click')
+        };
+
+        let state = {
+            booted: false,
+            holding: false,
+            heat: 0,
+            crashed: false,
+            filesLoaded: false
+        };
+
+        // --- 1. BOOT SEQUENCE ---
+        const bootLines = [
+            "> Initializing WizardOS Kernel v4.2...",
+            "> Loading graphic drivers... [OK]",
+            "> Connecting to Neural Network...",
+            "> Verifying Magic Mana Levels...",
+            "> WARNING: Unstable Energy Detected.",
+            "> System Ready."
+        ];
+
+        let lineIdx = 0;
+        function runBoot() {
+            if (lineIdx < bootLines.length) {
+                const p = document.createElement('div');
+                p.textContent = bootLines[lineIdx];
+                ui.bootLog.appendChild(p);
+                ui.bootLog.scrollTop = ui.bootLog.scrollHeight;
+                lineIdx++;
+                setTimeout(runBoot, Math.random() * 500 + 100);
+            } else {
+                ui.startBtn.classList.remove('hidden');
+            }
+        }
+        window.onload = runBoot;
+
+        ui.startBtn.addEventListener('click', () => {
+            state.booted = true;
+            ui.bootLayer.style.opacity = '0';
+            setTimeout(() => { 
+                ui.bootLayer.style.display = 'none'; 
+                // Inicia áudio BG (volume baixo)
+                audio.bg.volume = 0.2;
+                audio.bg.play().catch(e => console.log("Audio autoplay block"));
+            }, 500);
         });
 
-        els.bootText.innerHTML += `> Detected ${state.fetchedButtons.length} entries.\n`;
-        els.bootText.innerHTML += `> System Ready.\n`;
+        // --- 2. CHAOS MECHANIC (A "MAKITA" MÁGICA) ---
+        // Se clicar em coisas seguras (botões, links), não ativa o caos
+        function isSafeTarget(target) {
+            return target.closest('.safe-hover') || target.closest('#resources-modal');
+        }
 
-      } catch (error) {
-        els.bootText.innerHTML += `> Scan Failed: ${error.message}\n> Loading backups...\n`;
-        console.warn("Github API failed:", error);
-      }
-    }
+        function startChaos(e) {
+            if (!state.booted || state.crashed || isSafeTarget(e.target)) return;
+            
+            state.holding = true;
+            ui.cursor.style.display = 'block';
+            updateCursor(e);
+            
+            // Audio switch
+            audio.bg.pause();
+            audio.chaos.currentTime = 0;
+            audio.chaos.volume = 0.5; // Começa médio
+            audio.chaos.play();
 
-    /* =================================================
-       4. MATRIX RAIN (FUNDO VISUAL)
-       ================================================= */
-    const canvas = document.getElementById('matrix-canvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-    window.addEventListener('resize', resize); resize();
-    const chars = "01 THEWEE SPACE LIQUID";
-    const drops = Array(Math.floor(width / 14)).fill(1);
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = "#00ff41"; ctx.font = "14px monospace";
-      drops.forEach((y, i) => {
-        ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, y*14);
-        if(y*14 > height && Math.random() > 0.98) drops[i] = 0; drops[i]++;
-      });
-      requestAnimationFrame(drawMatrix);
-    }
-    drawMatrix();
+            // Visual effects
+            document.body.classList.add('chaos-mode');
+            ui.cursor.classList.add('cursor-spin');
+        }
 
-    /* =================================================
-       5. INICIALIZAÇÃO (BOOT)
-       ================================================= */
-    const bootLines = [
-      "> Initializing Kernel...",
-      "> Verifying Makita RPM... [OK]",
-      "> Mounting 'pasta-liquida'..."
-    ];
-    let lineIdx = 0;
+        function stopChaos() {
+            if (!state.holding) return;
+            state.holding = false;
+            
+            audio.chaos.pause();
+            if (!state.crashed) {
+                audio.bg.play();
+                ui.cursor.style.display = 'none';
+                document.body.classList.remove('chaos-mode');
+                ui.main.style.transform = `translate(0px, 0px)`;
+            }
+        }
 
-    async function bootSequence() {
-      if (lineIdx < bootLines.length) {
-        els.bootText.innerHTML += bootLines[lineIdx] + "\n";
-        lineIdx++;
-        setTimeout(bootSequence, 300);
-      } else {
-        // Roda o scanner ao final do texto
-        await scanRepository();
-        els.startBtn.style.display = "block";
-      }
-    }
-    window.onload = bootSequence;
+        function updateCursor(e) {
+            const x = e.clientX || e.touches?.[0].clientX;
+            const y = e.clientY || e.touches?.[0].clientY;
+            ui.cursor.style.left = x + 'px';
+            ui.cursor.style.top = y + 'px';
+        }
 
-    // Iniciar Sistema
-    function startSystem() {
-      if(state.booted) return;
-      state.booted = true;
-      els.bootScreen.style.display = 'none';
-      els.sysContainer.style.display = 'flex';
-      
-      audio.bg.volume = 0.3;
-      audio.bg.play().catch(()=>{});
-      
-      renderButtons();
-    }
-    els.startBtn.addEventListener('click', startSystem);
-    els.startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startSystem(); }, {passive: false});
-
-    /* =================================================
-       6. RENDERIZAR BOTÕES
-       ================================================= */
-    function renderButtons() {
-      els.fileList.innerHTML = ""; 
-      // Une botões fixos com os detectados
-      const allButtons = [...FIXED_BUTTONS, ...state.fetchedButtons];
-
-      allButtons.forEach(btnData => {
-        const a = document.createElement('a');
-        a.href = btnData.url;
-        a.className = 'file-btn';
-        if(btnData.url.startsWith('http')) a.target = "_blank"; // Abre externo em nova aba
+        // Event Listeners para Mouse/Touch
+        window.addEventListener('mousedown', startChaos);
+        window.addEventListener('mousemove', (e) => {
+            if(state.holding) updateCursor(e);
+        });
+        window.addEventListener('mouseup', stopChaos);
         
-        a.innerHTML = `<span>${btnData.name}</span>`;
+        window.addEventListener('touchstart', (e) => startChaos(e), {passive: false});
+        window.addEventListener('touchmove', (e) => {
+            if(state.holding) {
+                e.preventDefault(); // Previne scroll enquanto destrói o sistema
+                updateCursor(e);
+            }
+        }, {passive: false});
+        window.addEventListener('touchend', stopChaos);
 
-        const btnSound = document.getElementById(btnData.soundId);
-        
-        // Click seguro (toca som e vai)
-        const clickHandler = () => {
-           if(btnSound) { btnSound.currentTime = 0; btnSound.play().catch(()=>{}); }
+        // --- 3. GAME LOOP (AQUECIMENTO) ---
+        function gameLoop() {
+            if (state.crashed) return;
+
+            if (state.holding) {
+                // Aumenta instabilidade
+                state.heat += 0.8;
+                
+                // Shake effect (CSS Transform)
+                const intensity = Math.min(state.heat / 5, 20);
+                const x = (Math.random() - 0.5) * intensity;
+                const y = (Math.random() - 0.5) * intensity;
+                ui.main.style.transform = `translate(${x}px, ${y}px)`;
+
+                // Aumenta pitch/volume do audio de caos
+                audio.chaos.volume = Math.min(state.heat / 100, 1);
+
+                if (state.heat >= 100) {
+                    crashSystem();
+                }
+            } else {
+                // Esfria sistema
+                if (state.heat > 0) state.heat -= 2;
+                if (state.heat < 0) state.heat = 0;
+            }
+
+            // Atualiza barra
+            ui.bar.style.width = state.heat + '%';
+            
+            // Muda cor da barra baseado no perigo
+            if(state.heat > 80) ui.bar.style.background = '#EF4444'; // Red
+            else if(state.heat > 50) ui.bar.style.background = '#A855F7'; // Purple
+            else ui.bar.style.background = '#3B82F6'; // Blue
+
+            requestAnimationFrame(gameLoop);
+        }
+        requestAnimationFrame(gameLoop);
+
+        function crashSystem() {
+            state.crashed = true;
+            stopChaos();
+            audio.chaos.pause();
+            audio.bg.pause();
+            audio.crash.play();
+            
+            ui.main.style.display = 'none';
+            ui.bsod.style.display = 'flex';
+            
+            setTimeout(() => {
+                location.reload();
+            }, 5000);
+        }
+
+        // --- 4. GITHUB SCANNER (Recursos) ---
+        window.toggleResources = () => {
+            audio.click.currentTime = 0;
+            audio.click.play();
+            ui.modal.classList.toggle('active');
+            
+            if (ui.modal.classList.contains('active') && !state.filesLoaded) {
+                fetchRepo();
+            }
         };
-        a.addEventListener('click', clickHandler);
 
-        // IMPEDE que a makita ative ao clicar no botão (Mobile/PC)
-        a.addEventListener('mousedown', e => e.stopPropagation());
-        a.addEventListener('touchstart', e => e.stopPropagation(), {passive: true});
+        async function fetchRepo() {
+            ui.fileList.innerHTML = '<div class="text-blue-400 animate-pulse">> Connecting to Neural Uplink...</div>';
+            
+            try {
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TARGET_FOLDER}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error("Connection Refused (404/403)");
+                
+                const data = await response.json();
+                ui.fileList.innerHTML = ''; // Limpa loading
 
-        els.fileList.appendChild(a);
-      });
-    }
+                // Adiciona botão Home/Root
+                addFileLink(".. ROOT / HOME", "https://github.com/theweewee/Thewee.space", true);
 
-    /* =================================================
-       7. MAKITA (CAOS E AQUECIMENTO)
-       ================================================= */
-    function updateCursor(x, y) {
-      els.cursor.style.display = 'block';
-      els.cursor.style.left = x + 'px'; els.cursor.style.top = y + 'px';
-    }
+                data.forEach(item => {
+                    if(item.name.includes('.html')) {
+                        addFileLink(item.name.replace('.html', '').toUpperCase(), `/${TARGET_FOLDER}/${item.name}`, false);
+                    }
+                });
+                state.filesLoaded = true;
 
-    function startChaos(x, y) {
-      if(!state.booted || state.crashed) return;
-      state.holding = true;
-      updateCursor(x, y);
-      
-      audio.bg.pause(); 
-      audio.makita.currentTime = 0; 
-      audio.makita.play().catch(()=>{});
-      
-      els.cursor.classList.add('cursor-spin');
-      document.body.classList.add('chaos-mode');
-    }
+            } catch (err) {
+                // Fallback (Mock Data) se a API falhar para demo
+                ui.fileList.innerHTML = `
+                    <div class="text-red-400 mb-2">> ERROR: ${err.message}</div>
+                    <div class="text-gray-500 mb-4">> Loading cached hologram data...</div>
+                `;
+                // Dados falsos para demo
+                addFileLink(".. ROOT", "#", true);
+                addFileLink("PROJECT_ALPHA", "#", false);
+                addFileLink("CHAOS_ENGINE", "#", false);
+                addFileLink("WIZARD_NOTES", "#", false);
+            }
+        }
 
-    function stopChaos() {
-      if(!state.holding) return;
-      state.holding = false;
-      
-      audio.makita.pause();
-      els.cursor.classList.remove('cursor-spin');
-      document.body.classList.remove('chaos-mode');
-      els.danger.style.opacity = 0;
-      
-      if(!state.crashed) { 
-        state.heat = 0; 
-        updateHeat(); 
-        audio.bg.play().catch(()=>{}); 
-        els.cursor.style.display = 'none'; 
-      }
-    }
+        function addFileLink(name, url, isRoot) {
+            const div = document.createElement('div');
+            div.className = "p-3 border-b border-gray-800 hover:bg-blue-900/20 cursor-pointer flex justify-between group transition-colors";
+            div.innerHTML = `
+                <span class="${isRoot ? 'text-yellow-400' : 'text-blue-300'} group-hover:text-white">
+                    <i class="fas ${isRoot ? 'fa-hdd' : 'fa-file-code'} mr-2"></i> ${name}
+                </span>
+                <span class="text-gray-600 text-xs group-hover:text-blue-400">ACCESS >></span>
+            `;
+            div.onclick = () => {
+                window.open(url, '_blank');
+            };
+            ui.fileList.appendChild(div);
+        }
 
-    // INPUTS PC
-    window.addEventListener('mousemove', e => { if(state.booted && !state.crashed) updateCursor(e.clientX, e.clientY); });
-    window.addEventListener('mousedown', e => {
-      // Só ativa se não for botão
-      if(state.booted && (e.button === 0 || e.button === 1) && !e.target.closest('.file-btn')) {
-        startChaos(e.clientX, e.clientY);
-      }
-    });
-    window.addEventListener('mouseup', stopChaos);
+        // --- 5. PARTICLE SYSTEM (VISUAL APENAS) ---
+        const canvas = document.getElementById('magic-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
 
-    // INPUTS MOBILE (Touch)
-    window.addEventListener('touchstart', e => {
-      if(state.booted && !e.target.closest('.file-btn') && !e.target.closest('.click-prompt')) {
-         startChaos(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    }, {passive: false});
-    window.addEventListener('touchmove', e => { if(state.holding) updateCursor(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
-    window.addEventListener('touchend', stopChaos);
-    window.addEventListener('touchcancel', stopChaos);
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if(this.size > 0.2) this.size -= 0.01;
+                if(this.size <= 0.2) {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = 2;
+                }
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
 
-    /* =================================================
-       8. LOOP DE JOGO (AQUECIMENTO)
-       ================================================= */
-    setInterval(() => {
-      if(state.crashed) return;
-      if(state.holding) {
-        state.heat += 2;
-        const shake = 5;
-        els.sysContainer.style.transform = `translate(${Math.random()*shake - shake/2}px, ${Math.random()*shake - shake/2}px)`;
-        els.danger.style.opacity = state.heat / 100;
-        if(state.heat > 70) els.status.innerText = "WARNING: HIGH RPM";
-        if(state.heat >= 100) crashSystem();
-      } else {
-        if(state.heat > 0) state.heat -= 5;
-        els.sysContainer.style.transform = "none";
-      }
-      updateHeat();
-    }, 50);
+        function initParticles() {
+            for(let i=0; i<50; i++) particles.push(new Particle());
+        }
+        initParticles();
 
-    function updateHeat() {
-      if(state.heat < 0) state.heat = 0;
-      els.heatBar.style.width = state.heat + "%";
-      els.heatBar.style.background = state.heat < 50 ? "var(--primary)" : "red";
-      els.status.style.color = state.heat < 50 ? "var(--primary)" : "red";
-      if(state.heat < 50) els.status.innerText = "ONLINE";
-    }
+        function animateParticles() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
 
-    function crashSystem() {
-      state.crashed = true; state.holding = false;
-      audio.makita.pause(); audio.crash.play().catch(()=>{});
-      
-      document.body.style.background = "#0000aa"; // Tela azul
-      els.sysContainer.style.display = 'none'; 
-      els.cursor.style.display = 'none';
-      document.body.classList.remove('chaos-mode');
-      
-      els.bootScreen.style.display = 'flex'; 
-      els.startBtn.style.display = 'none';
-      els.bootText.innerHTML = "FATAL ERROR 0xC0000221\n> MAKITA RPM OVERLOAD.\n> REBOOTING SYSTEM...";
-      
-      setTimeout(() => location.reload(), 4000);
-    }
-  </script>
+    </script>
 </body>
 </html>
